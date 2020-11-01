@@ -35,6 +35,10 @@ public class WebCrawl {
      * @return URL + 响应报文【含头部和网页实体】 （由于存在URL跳转，最后返回数据的URL不一定是指定的 httpURL）
      */
     public static BiSupplier<URL,byte[]> getHttpPacketLoadedWithHTML(String httpURL) throws IOException{
+        // 系统代理
+        System.setProperty("http.proxyHost","127.0.0.1");
+        System.setProperty("http.proxyPort","10809");
+
         HttpURLConnection conn = null;
         InputStream in = null;
         BiSupplier<URL,byte[]> result = null;
@@ -102,18 +106,17 @@ public class WebCrawl {
      * @param URL
      * @return
      */
-    public static String webCrawl(String URL){
-        String result = null;
+    public static Document webCrawl(String URL){
+        Document doc = null;
         try {
-            Document doc = Jsoup.connect(URL).get();
+              doc = Jsoup.connect(URL).get();
 //            Elements elements = doc.select("");
 //            for (Element element : elements) {
 //                System.out.println(element.text() + ":" + element.attr("href"));
 //            }
-            result = doc.outerHtml();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return result;
+        return doc;
     }
 }
