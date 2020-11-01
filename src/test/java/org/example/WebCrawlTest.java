@@ -1,6 +1,6 @@
 package org.example;
 
-import org.example.crawl.WebCrawl;
+import org.example.work.crawl.WebCrawl;
 import org.example.kit.entity.BiSupplier;
 import org.junit.Test;
 
@@ -15,7 +15,7 @@ import java.util.Arrays;
  * @Created by shuaif
  */
 public class WebCrawlTest {
-    private final String url = "http://baidu.com";
+    private final String url = "http://google.com";
 
     @Test
     public void testGetHttpPackageWithHtml() throws IOException {

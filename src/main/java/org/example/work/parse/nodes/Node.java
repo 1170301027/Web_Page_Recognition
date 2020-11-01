@@ -1,4 +1,4 @@
-package org.example.parse.nodes;
+package org.example.work.parse.nodes;
 
 /**
  * 节点类型，保存

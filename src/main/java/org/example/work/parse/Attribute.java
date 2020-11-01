@@ -1,4 +1,4 @@
-package org.example.parse;
+package org.example.work.parse;
 
 import org.example.kit.entity.ByteArray;
 import org.example.kit.StringKit;

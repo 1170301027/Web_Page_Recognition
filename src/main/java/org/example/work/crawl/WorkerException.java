@@ -1,4 +1,4 @@
-package org.example.crawl;
+package org.example.work.crawl;
 
 public class WorkerException extends RuntimeException {
     public WorkerException(String message, Throwable cause){

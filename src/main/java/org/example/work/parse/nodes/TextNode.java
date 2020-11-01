@@ -1,8 +1,6 @@
-package org.example.parse.nodes;
+package org.example.work.parse.nodes;
 
 import org.example.kit.entity.ByteArray;
-import org.example.parse.nodes.Element;
-import org.example.parse.nodes.Node;
 
 public class TextNode extends Node {
     private ByteArray text;

@@ -1,8 +1,8 @@
-package org.example.parse.nodes;
+package org.example.work.parse.nodes;
 
 import org.example.kit.entity.ByteArray;
-import org.example.parse.Attribute;
-import org.example.parse.Tag;
+import org.example.work.parse.Attribute;
+import org.example.work.parse.Tag;
 
 import java.util.ArrayList;
 import java.util.Arrays;

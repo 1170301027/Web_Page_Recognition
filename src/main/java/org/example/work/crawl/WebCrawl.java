@@ -1,21 +1,16 @@
-package org.example.crawl;
+package org.example.work.crawl;
 
 
 import org.example.kit.StreamKit;
 import org.example.kit.entity.BiSupplier;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import sun.net.www.http.HttpClient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 

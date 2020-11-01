@@ -1,12 +1,12 @@
-package org.example.parse;
+package org.example.work.parse;
 
 import org.example.kit.ByteBuffer;
 import org.example.kit.StringKit;
 import org.example.kit.entity.ByteArray;
-import org.example.parse.nodes.Document;
-import org.example.parse.nodes.Element;
-import org.example.parse.nodes.Node;
-import org.example.parse.nodes.TextNode;
+import org.example.work.parse.nodes.Document;
+import org.example.work.parse.nodes.Element;
+import org.example.work.parse.nodes.Node;
+import org.example.work.parse.nodes.TextNode;
 
 import java.util.*;
 import java.util.function.Consumer;

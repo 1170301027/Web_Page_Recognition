@@ -1,7 +1,7 @@
 package org.example.kit;
 
 
-import org.example.crawl.WorkerException;
+import org.example.work.crawl.WorkerException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

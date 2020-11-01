@@ -1,6 +1,6 @@
-package org.example.parse;
+package org.example.work.parse;
 
-import org.example.parse.nodes.Node;
+import org.example.work.parse.nodes.Node;
 
 import java.util.HashMap;
 import java.util.Map;
