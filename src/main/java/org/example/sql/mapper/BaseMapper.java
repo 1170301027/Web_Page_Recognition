@@ -1,4 +1,4 @@
-package org.example.mapper;
+package org.example.sql.mapper;
 
 import org.apache.ibatis.annotations.DeleteProvider;
 import org.apache.ibatis.annotations.InsertProvider;
@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.SelectProvider;
 import org.apache.ibatis.annotations.UpdateProvider;
-import org.example.mybatis.CrudTemplet;
+import org.example.sql.mybatis.CrudTemplet;
 
 /**
  * 实现基本的 增,删,改,查接口,不需要重复写 所有mapper都继承这个BaseMapper

@@ -1,4 +1,4 @@
-package org.example.mybatis;
+package org.example.sql.mybatis;
 
 import java.util.List;
 import java.util.Map;

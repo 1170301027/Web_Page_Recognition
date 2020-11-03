@@ -1,4 +1,4 @@
-package org.example.mybatis;
+package org.example.sql.mybatis;
 
 import com.staui.kit.StringKit;
 import com.staui.wpi.web.annotation.Column;

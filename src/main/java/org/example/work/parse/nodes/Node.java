@@ -1,7 +1,7 @@
 package org.example.work.parse.nodes;
 
 /**
- * 节点类型，保存
+ * 节点类型，保存父节点，反向索引，
  */
 public abstract class Node {
     Element parent;

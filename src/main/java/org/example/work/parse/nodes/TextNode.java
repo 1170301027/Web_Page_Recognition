@@ -2,8 +2,11 @@ package org.example.work.parse.nodes;
 
 import org.example.kit.entity.ByteArray;
 
+/**
+ * 文本节点类型
+ */
 public class TextNode extends Node {
-    private ByteArray text;
+    private final ByteArray text;
 
     public TextNode(ByteArray text, Element parent, int index){
         super(parent, index);

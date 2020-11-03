@@ -10,13 +10,13 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- *
+ * 元素
  */
 public class Element extends Node {
     private static final List<Node> EMPTY_CHILDREN = Collections.emptyList();
     private static final Attribute[] EMPTY_ATTRIBUTE = new Attribute[0];
 
-    private Tag tag;
+    private final Tag tag;
 
     private List<Node> childNodes;
     private Attribute[] attrs;

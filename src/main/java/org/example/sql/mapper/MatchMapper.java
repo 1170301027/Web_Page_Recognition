@@ -1,9 +1,9 @@
-package org.example.mapper;
+package org.example.sql.mapper;
 
-import com.staui.wpi.web.pojo.Fingerprint;
-import com.staui.wpi.web.pojo.IndexResult;
-import com.staui.wpi.web.pojo.InvertedIndex;
 import org.apache.ibatis.annotations.Param;
+import org.example.sql.pojo.Fingerprint;
+import org.example.sql.pojo.IndexResult;
+import org.example.sql.pojo.InvertedIndex;
 
 import java.util.List;
 
