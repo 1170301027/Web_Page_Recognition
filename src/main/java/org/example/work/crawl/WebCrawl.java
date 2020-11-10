@@ -34,6 +34,9 @@ public class WebCrawl {
         System.setProperty("http.proxyHost","127.0.0.1");
         System.setProperty("http.proxyPort","10809");
 
+        if (!httpURL.contains("http")) {
+            httpURL = "http://" + httpURL;
+        }
         HttpURLConnection conn = null;
         InputStream in = null;
         BiSupplier<URL,byte[]> result = null;

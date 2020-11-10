@@ -39,6 +39,14 @@ public class FileKit {
     }
 
     public static void writeAllLines(List<String> list, String fileName) throws IOException{
+        File file = new File(fileName);
+        if (!file.getParentFile().exists()) {
+            if (!file.getParentFile().mkdir()) {
+                System.out.println("创建目标文件目录失败");
+                return ;
+            }
+        }
+        file.createNewFile();
         PrintWriter pw = new PrintWriter(new FileOutputStream(fileName));
         for(String s : list){
             pw.println(s);

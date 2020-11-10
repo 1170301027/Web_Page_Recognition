@@ -45,6 +45,6 @@ public class Fingerprint implements Comparable<Fingerprint> {
 
     @Override
     public int compareTo(Fingerprint o){
-        return (similarity < o.similarity) ? 1 : ((similarity == o.similarity) ? 0 : -1);
+        return Double.compare(o.similarity, similarity);
     }
 }

@@ -1,12 +1,18 @@
 package org.example.work.fingerprint;
 
 import org.example.auxiliary.Keys;
+import org.example.kit.ByteBuffer;
 import org.example.kit.entity.ByteArray;
+import org.example.kit.io.ByteBuilder;
+import org.example.work.parse.Attribute;
+import org.example.work.parse.Tag;
+import org.example.work.parse.nodes.Element;
+import org.example.work.parse.nodes.Node;
+import org.example.work.parse.nodes.TextNode;
+import sun.security.util.ECUtil;
 
 import java.security.Key;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Classname ExtractFingerprint
@@ -19,6 +25,9 @@ public class ExtractFingerprint {
     private static final int RESPONSE_TAG = 1;
     private static final int HTML_HEAD_TAG = 2;
     private static final int HTML_BODY_TAG = 3;
+
+    public static final int max_child_number_threshold = 200;
+    public static final int max_parse_depth = 6;
     /**
      * BKDR算法实现，将字节数组映射为一个一个字节
      * @param byteArray 字节数组对应的字符串
@@ -111,15 +120,196 @@ public class ExtractFingerprint {
     }
 
     /**
-     * 获取网页head部分的指纹，html_head部分类似于request_header部分的键值对
-     * @param html_head head部分的DOM
+     * 对url字段去除host子串之后提取一个hash值
+     * @param byteArray
+     * @return
      */
-    public static byte[] handleHtmlHeader(String html_head){
-        return null;
+    private static byte urlHashTo1Byte(String byteArray) {
+        if (byteArray.contains("http")) {
+            String[] splits = byteArray.split("/");
+            StringBuilder val = new StringBuilder();
+            for (int i = 2; i < splits.length; i++) {
+                val.append(splits[i]);
+            }
+            return hashTo1Byte(val.substring(0));
+        }
+        return hashTo1Byte(byteArray);
+    }
+
+    /**
+     * 根据key值获取ID值，针对HTML head部分的指纹提取
+     * @param key
+     * @return
+     */
+    private static int getIDKey(String key) {
+        key = key.toLowerCase();
+        for (int i = 0; i < Keys.HEAD_PROPERTIES.length; i++) {
+            if (key.equals(Keys.HEAD_PROPERTIES[i].toLowerCase())) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
+    static byte byteHash(ByteArray data){
+        if(data == null)
+            return 0;
+        int hash = data.hashCode();
+        hash ^= hash >>> 16;
+        hash ^= hash >>> 8;
+        return (byte)hash;
+    }
+
+    /**
+     * 获取网页head部分的指纹，html_head部分类似于request_header部分的键值对 【IDkeyi, hash(value)】
+     * @param html_head head部分的DOM结构
+     */
+    public static byte[] handleHtmlHeader(Element html_head){
+        byte[] result = new byte[1024];
+        int i = 0; // index索引
+
+        for (Node node : html_head.children()) {
+            if (!(node instanceof  Element)) {
+                continue;
+            }
+            Element element = (Element)node;
+            Tag tag = element.getTag();
+            switch (tag.getName()) {
+                case "meta":
+                    // 元数据通常以名称/值存在,如果没有name属性值，那么键值对可能以http-equiv的形式存在
+                    ByteArray key = element.attr("name");
+                    if (key == null) {
+                        key = element.attr("http-equiv");
+                    }
+                    if (key == null) { // !name and !http-equiv 查看charset字段
+                        ByteArray charset = element.attr("charset");
+                        if (charset == null) {
+                            byte[] temp = element.attrs().length > 1 ? element.attrs()[0].getKey() : new byte[]{-1};
+                        }
+                    } else {
+                        ByteArray content = element.attr("content");
+                        int id = getIDKey(key.toStr());
+                        result[i++] = (byte) (id == -1 ? (byteHash(key) | 0x80) : id);
+                        result[i++] = hashTo1Byte(content.toStr());
+                    }
+                case "link":
+                    ByteArray rel = element.attr("rel");
+                    if (rel == null) {
+                        rel = element.attrs().length > 1 ? element.attrs()[0].getValue() : new ByteArray(new byte[]{-1});
+                    }
+                    int id = getIDKey(rel.toStr().toLowerCase());
+                    result[i++] = (byte) (id == -1 ? (byteHash(rel) | 0x80) : id);
+
+                    ByteArray href = element.attr("href");
+                    if (href == null) {
+                        break;
+                    }
+                    result[i++] = urlHashTo1Byte(href.toStr());
+                case "title":
+                    result[i++] = (byte) 2;
+                    break;// 不提取
+                case "style":
+                    result[i++] = (byte) 1;
+                    if (element.hasChild()) {
+                        Node child = element.child(0);
+                        if (child instanceof TextNode) {
+                            result[i++] = hashTo1Byte(((TextNode) child).getText().toStr());
+                        }
+                    }
+                case "noscript": //TODO
+                    break;
+                case "script":
+                    result[i++] = (byte) 3;
+                    ByteArray val = element.attr("src");
+                    if (val != null) {
+                        //  标签有src属性，进行指纹提取
+                        result[i++] = urlHashTo1Byte(val.toStr());
+                    }
+                    break;
+                default:
+                    result[i++] = (byte) element.getTagName().hashCode();
+            }
+        }
+        return constructFingerprint(HTML_HEAD_TAG,new ByteArray(result,0,i).getBytes());
 
     }
 
-    public static byte[] handleHtmlBody(String html_body){
-        return null;
+    /**
+     * 获取网页body部分的指纹，html_body部分的指纹为树形指纹
+     * @param html_body body部分的DOM结构
+     * @return
+     */
+    public static byte[] handleHtmlBody(Element html_body){
+        if (html_body == null) {
+            System.out.println("HTML Body is null");
+            return null;
+        }
+        byte[] result = new byte[4096];
+        int i = 0;
+        int oldi = i;
+
+        Queue<Node> queue = new LinkedList<>(); // 队列用于层序遍历
+        Node[] leaf_nodes; // 存放解析最大深度时候的所有节点（相当于叶子节点），用于特征词提取
+        queue.offer(html_body);
+        int next_level = 0,to_be_printed = 1, node_count = to_be_printed;
+        while (!queue.isEmpty()) {
+            Node temp = queue.poll();
+            if (temp instanceof Element) {
+                Element cur_elment = (Element)temp;
+                int id = cur_elment.getTag().getId();
+                result[i++] = (byte) ((temp == temp.getParent().lastChild() ? 1<<7 : 0) | (id | 0x80));
+                // 从高到低前4位为class值的hash, 后4位为父元素在其兄弟节点的索引位置
+                ByteArray cssCLass = cur_elment.attr("class");
+                result[i++] = (byte) ((cur_elment.childrenSize() == 0 ? 0 : 1<<7) | (byteHash(cssCLass) | 0x80));
+                temp.setHashCode(result[i] << 8);
+
+                int child_count = 0;
+                boolean add_children = true;
+                for (Node child : cur_elment.children()) {
+                    if (child instanceof TextNode || ((Element)child).getTag().isContentLevel())
+                        child_count++;
+                }
+                if (child_count > 3 && child_count > cur_elment.childrenSize() >> 1) {
+                    add_children = false;
+                }
+
+                if (add_children) {
+                    child_count = 0;
+                    for (Node child : cur_elment.children()) {
+                        queue.offer(child);
+                        child_count++;
+                        node_count++;
+                        if ((child_count > 29 || node_count > max_child_number_threshold) && child_count < cur_elment.childrenSize()) {
+                            if (child_count > 1) {
+                                queue.offer(cur_elment.lastChild());
+                                child_count++;
+                            }
+                            break;
+                        }
+                    }
+                    next_level += child_count;
+                }
+            } else if (temp instanceof TextNode) {
+                TextNode text = (TextNode)temp;
+                result[i++] = (byte) (temp == temp.getParent().lastChild() ? 1 << 7:0);
+                result[i++] = hashTo1Byte(text.getText().toStr());
+                temp.setHashCode(result[i] << 8);
+            }
+            to_be_printed--;
+            if (to_be_printed == 0) {
+                to_be_printed = next_level;
+                next_level = 0;
+                if (i-oldi >= 12) {
+                    // TODO 提取一个特征词
+                }
+                oldi = i;
+
+                if (temp.getDepth() + 1 == max_parse_depth) {
+                    leaf_nodes = queue.toArray(new Node[0]);
+                }
+            }
+        }
+        // TODO 特征词提取
+        return constructFingerprint(HTML_BODY_TAG,new ByteArray(result,0,i).getBytes());
     }
 }

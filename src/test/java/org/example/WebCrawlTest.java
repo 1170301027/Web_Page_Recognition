@@ -1,12 +1,17 @@
 package org.example;
 
+import org.example.auxiliary.FilePath;
+import org.example.kit.FileKit;
 import org.example.work.crawl.WebCrawl;
 import org.example.kit.entity.BiSupplier;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * @Classname WebCrawlTest
@@ -29,6 +34,13 @@ public class WebCrawlTest {
 
     @Test
     public void testJsoup(){
-        System.out.println(WebCrawl.webCrawl(url));
+        String htmlDoc = WebCrawl.webCrawl(url).outerHtml();
+        String filename = FilePath.SOURCE_PATH + url.hashCode();
+        try {
+            FileKit.writeAllLines(Collections.singletonList(htmlDoc),filename);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println();
     }
 }

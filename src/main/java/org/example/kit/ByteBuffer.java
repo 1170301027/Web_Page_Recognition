@@ -7,10 +7,10 @@ import java.util.Arrays;
 
 public class ByteBuffer {
 
-    private byte[] buffer;
+    private final byte[] buffer;
     private int position;
-    private int offset;
-    private int limit;
+    private final int offset;
+    private final int limit;
 
     private int mark;
 
@@ -49,6 +49,9 @@ public class ByteBuffer {
         return position;
     }
 
+    /**
+     * 获取当前字节
+     */
     public byte get(){
         return buffer[position];
     }
@@ -72,15 +75,18 @@ public class ByteBuffer {
         return position + 1 < limit;
     }
 
-    public byte next(){
+    public void next(){
         if(++position >= limit){
             position--;
             indexOutOfBound(position + 1);
         }
-        return buffer[position];
     }
 
-    public boolean goNext(){
+    /**
+     * 可以继续解析
+     * @return
+     */
+    public boolean canGo(){
         if(++position >= limit){
             position--;
             return false;
@@ -110,7 +116,11 @@ public class ByteBuffer {
         mark = 0;
     }
 
-
+    /**
+     * 判断是否有下一个tag符号
+     * @param tag
+     * @return
+     */
     public boolean hasNext(byte tag){
         while(position < limit && buffer[position] != tag)
             position++;
@@ -137,17 +147,20 @@ public class ByteBuffer {
         return position;
     }
 
-    public int moveAfter(byte tag){
+    /**
+     * 移动到Tag之后的第一个位置
+     * @param tag
+     */
+    public void moveAfter(byte tag){
         while(position < limit && buffer[position] != tag)
             position++;
         if(++position >= limit){
             position--;
             indexOutOfBound(limit);
         }
-        return position;
     }
 
-    public int moveTo(byte... tag){
+    public void moveTo(byte... tag){
         while(position < limit){
             int t = moveTo(tag[0]);
             if(limit - t < tag.length){
@@ -161,10 +174,11 @@ public class ByteBuffer {
                 break;
             position++;
         }
-        return position;
     }
 
-    // 获取下一个非空白字符或其第一个字节
+    /**
+     * 获取下一个非空白字符的下标
+     */
     public int moveToUnblankChar(){
         byte c;
         while(position < limit && ((c = buffer[position]) < 33 && c >= 0))
@@ -176,7 +190,9 @@ public class ByteBuffer {
         return position;
     }
 
-    // 移动到空白ASCII字符
+    /**
+     * 移动到空白ASCII字符
+      */
     public int moveToBlankChar(){
         byte c;
         while(position < limit && ((c = buffer[position]) > 32 || c < 0))
@@ -188,6 +204,9 @@ public class ByteBuffer {
         return position;
     }
 
+    /**
+     * 移动到空白字符或者下一个tag
+     */
     public int moveUntilBlankCharOr(byte tag){
         byte c;
         while(position < limit && ((c = buffer[position]) > 32 || c < 0) && c != tag)
@@ -217,6 +236,11 @@ public class ByteBuffer {
         return mark;
     }
 
+    /**
+     * 拷贝从当前位置到目标tag的字节数组
+     * @param tag
+     * @return
+     */
     public byte[] copyFromCurrPosTo(byte tag){
         int start = position;
         while(position < limit && buffer[position] != tag)

@@ -1,11 +1,11 @@
 package org.example.work.parse.nodes;
 
 /**
- * 节点类型，保存父节点，反向索引，
+ * 节点类型，保存父节点，反向索引，节点深度
  */
 public abstract class Node {
-    Element parent;
-    int depth;
+    Element parent; // 节点的父节点
+    int depth; // 节点深度
     int index;
 
     Node(Element parent, int index){
@@ -16,16 +16,16 @@ public abstract class Node {
 
     Node(){ }
 
-    public Element parent(){
+    public Element getParent(){
         return parent;
     }
 
-    public void parent(Element parent){
+    public void setParent(Element parent){
         this.depth = parent == null ? 0 : parent.depth + 1;
         this.parent = parent;
     }
 
-    public int index(){
+    public int getIndex(){
         return index >>> 24;
     }
 
@@ -54,6 +54,10 @@ public abstract class Node {
         return depth;
     }
 
+    /**
+     * 获取节点指纹
+     * @return
+     */
     public String toFpString(){
         return "";
     }

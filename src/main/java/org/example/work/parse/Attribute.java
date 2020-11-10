@@ -3,6 +3,9 @@ package org.example.work.parse;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.StringKit;
 
+/**
+ * 标签属性定义
+ */
 public class Attribute {
     byte[] key;
     ByteArray value;

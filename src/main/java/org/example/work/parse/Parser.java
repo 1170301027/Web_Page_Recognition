@@ -31,6 +31,8 @@ public class Parser {
     private ByteBuffer buffer;
     private final Map<String,Tag> localTagMap = new HashMap<>(32);
 
+    private Set<String> urls = new HashSet<>();
+
     public Parser(byte[] source, int from, int to){
         buffer = ByteBuffer.wrap(source, from, to - from);
     }
@@ -43,6 +45,11 @@ public class Parser {
         this(array.getParentBytes(), array.from(), array.to());
     }
 
+    /**
+     * 根据标签名，获取标签元素，找不到时新建标签元素
+     * @param tagName
+     * @return
+     */
     private Tag getTag(String tagName){
         Tag tag = localTagMap.get(tagName);
         if(tag != null)
@@ -80,7 +87,7 @@ public class Parser {
                 String name = getTagName();
                 if(name == null){
                     break;
-                }else if(!name.equals("html")){
+                }else if(!name.equals("html")){ // <html 匹配
                     if(name.charAt(0) == TAG_CLOSING_FLAG){
                         if(buffer.noNext(TAG_END_FLAG))
                             break;
@@ -92,7 +99,7 @@ public class Parser {
                     e.setAttrs(getAttributesFromTag());
                     if(!tag.isEmpty())
                         parse(e);
-                    if(!buffer.goNext())
+                    if(!buffer.canGo())
                         break;
                 }else{
                     findHTML = true;
@@ -103,7 +110,7 @@ public class Parser {
                 html.setAttrs(getAttributesFromTag());
                 parse(html);
             }
-            handleHTMLStructure(html);
+            handleHTMLStructure(html); // 解析HTML结构获取head和body
         }catch(Exception e){
             if(handleHTMLStructure(html)){
                 // ...
@@ -114,6 +121,11 @@ public class Parser {
         return html;
     }
 
+    /**
+     * 解析HTML文档结构。
+     * @param html
+     * @return
+     */
     private boolean handleHTMLStructure(Element html){
         Element head = html.childElement("head");
         Element body = html.childElement("body");
@@ -141,6 +153,7 @@ public class Parser {
         }
         if(size == 2)
             return true;
+        // 针对html节点下的子节点，除了head和body节点的其他节点加入到对应的head和body节点下。
         for(Iterator<Node> it = html.children().iterator(); it.hasNext(); ){
             Node child = it.next();
             if(child == head || child == body){
@@ -148,15 +161,15 @@ public class Parser {
             }
             if(child instanceof Element && ((Element)child).getTag().isInHead()){
                 head.appendChild(child);
-                child.parent(head);
+                child.setParent(head);
             }else{
                 body.appendChild(child);
-                child.parent(head);
+                child.setParent(head);
             }
             child.updateIndex();
             it.remove();
         }
-        if(body.index() == 0){
+        if(body.getIndex() == 0){
             html.appendChild(html.removeChild(body));
             body.updateIndex();
         }
@@ -164,51 +177,48 @@ public class Parser {
         return true;
     }
 
-    // TODO 非递归方式...
+    // 非递归方式...
     private Tag parse(Element parent){
         Tag pTag = parent.getTag();
-        if(pTag.isNoSubTag() || pTag.getName().equals("script")){
+        if(pTag.isNoSubTag() || pTag.getName().equals("script")){ // 标签不允许有子标签或者是文本节点
             return parseTextTag(parent);
         }
-        boolean parseAll = parent.getDepth() < maxParsingDepth;
+        boolean parseAll = parent.getDepth() < maxParsingDepth; // 判断是否解析到最大解析深度
         while(true){
-            if(!buffer.goNext())
+            if(!buffer.canGo()) // 判断是否有下一个标签或文本
                 break;
             int siblings = parent.children().size();
-            if(parseAll){
+            if(parseAll){ // 允许解析
                 int textFrom = buffer.position();
                 buffer.moveToUnblankChar();
-                if(buffer.get() != TAG_START_FLAG){ // 文本节点
+                if(buffer.get() != TAG_START_FLAG){ // 将文本节点添加到父节点的子节点列表中
                     TextNode text = new TextNode(buffer.wrapToByteArray(textFrom, buffer.moveTo(TAG_START_FLAG)), parent, siblings++);
                     parent.appendChild(text);
                 }
-            }else{
+            }else{ // 移动到下一个标签的开始部分
                 buffer.moveToUnblankChar();
                 if(buffer.get() != TAG_START_FLAG){ // 文本节点
                     buffer.moveTo(TAG_START_FLAG);
                 }
             }
             String name;
-            while(true){
-                name = getTagName();
-                if(name.charAt(0) == TAG_CLOSING_FLAG){
-                    buffer.moveTo(TAG_END_FLAG);
-                    String tag = name.substring(1);
-                    if(tag.equals(pTag.getName()))
-                        return null;
-                    else{
-                        Tag errTag = getTag(tag);
-                        if(parent.getParentByTag(errTag) != null)
-                            return errTag;
-                    }
-                }else{
-                    break;
+            name = getTagName(); // 获取标签名
+            if(name.charAt(0) == TAG_CLOSING_FLAG){ // 标签为关闭标签
+                buffer.moveTo(TAG_END_FLAG);
+                String tag = name.substring(1);
+                if(tag.equals(pTag.getName())) // 为当前父节点的结束标签，返回空
+                    return null;
+                else{
+                    Tag errTag = getTag(tag);
+                    if(parent.getParentByTag(errTag) != null)
+                        return errTag;
                 }
             }
+            // 未遇到结束标签，遇到新的开始标签，继续解析
             Tag tag = getTag(name), endTag = null;
             Element e = new Element(tag, parent, siblings);
             Consumer<Node> action = tag.getAction();
-            if(parseAll || action != null){
+            if(parseAll || action != null){ // 未到最大解析深度，或者tag绑定了事件，继续解析节点属性并添加子节点，否则跳过
                 e.setAttrs(getAttributesFromTag()); // 解析该元素的属性
                 if(parseAll){
                     parent.appendChild(e);
@@ -231,7 +241,7 @@ public class Parser {
     }
 
     private Tag parseTextTag(Element parent){
-        if(!buffer.goNext())
+        if(!buffer.canGo())
             return null;
         int textFrom = buffer.position();
         while(true){
@@ -286,12 +296,12 @@ public class Parser {
         while((v = buffer.get()) == '!' || v == '?'){ // TODO 注释的解析，getTagName方法优化
             if(buffer.getNext() == '-')
                 buffer.moveTo(COMMENT_END_FLAG);
-            buffer.moveTo(TAG_END_FLAG);
-            if(buffer.noNext(TAG_START_FLAG))
+            buffer.moveTo(TAG_END_FLAG); // <!--注释--> ?
+            if(buffer.noNext(TAG_START_FLAG)) //没有下一个标签
                 return null;
         }
-        int from = buffer.moveToUnblankChar();
-        buffer.moveUntilBlankCharOr(TAG_END_FLAG);
+        int from = buffer.moveToUnblankChar(); // 移动到非空白字符
+        buffer.moveUntilBlankCharOr(TAG_END_FLAG); // >
         byte[] bs = buffer.copyOfRange(from, buffer.position());
         for(int i = 0; i < bs.length; i++){
             v = bs[i];
@@ -303,10 +313,13 @@ public class Parser {
         return new String(bs);
     }
 
-    // TODO 可以优化下
+    /**
+     * 从标签中获取属性
+     * @return
+     */
     private Attribute[] getAttributesFromTag(){
         buffer.moveToUnblankChar();
-        if(buffer.get() == '>'){
+        if(buffer.get() == '>'){ // 标签结束，没有属性
             return null;
         }
         byte[] arr = buffer.array();
@@ -324,7 +337,7 @@ public class Parser {
 
             buffer.position(pos);
             pos = buffer.moveToUnblankChar();
-            if((c = arr[pos]) == '>' || c == '/')
+            if((c = arr[pos]) == '>' || c == '/') // 结束标签
                 break;
             if(c != '=')
                 continue;
@@ -339,9 +352,17 @@ public class Parser {
                 from = pos;
                 attr.value = buffer.wrapToByteArray(from, buffer.moveUntilBlankCharOr(TAG_END_FLAG));
             }
+            extractURLs(attr);
         }
         buffer.moveTo(TAG_END_FLAG);
-        return result.toArray(new Attribute[result.size()]);
+        return result.toArray(new Attribute[0]);
+    }
+
+    public void extractURLs(Attribute attribute) {
+        if (attribute.isKey("href")) {
+            String val = attribute.getValue().toStr();
+            this.urls.add(val);
+        }
     }
 
     public int getMaxParsingDepth(){
@@ -349,5 +370,9 @@ public class Parser {
     }
     public void setMaxParsingDepth(int maxParsingDepth){
         this.maxParsingDepth = maxParsingDepth;
+    }
+
+    public Set<String> getUrls() {
+        return urls;
     }
 }

@@ -1,5 +1,7 @@
 package org.example.kit;
 
+import java.io.UnsupportedEncodingException;
+
 /**
  * A collection of commonly used String tools of java
  *
@@ -73,5 +75,22 @@ public class StringKit {
         byte[] bs = str.getBytes();
         toLowerCase(bs);
         return new String(bs);
+    }
+
+
+    /**
+     * byte数组转换为Stirng
+     * @param s1-数组
+     * @param encode-字符集
+     * @return 对应字符串,异常返回null
+     */
+    public static String getString(byte[] s1,String encode) {
+        String result;
+        try {
+            result =  new String(s1, encode);
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
+        return result;
     }
 }

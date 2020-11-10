@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * 标签
+ */
 public class Tag {
     private static final Map<String,Tag> TAGS_MAP = new HashMap<>();
 

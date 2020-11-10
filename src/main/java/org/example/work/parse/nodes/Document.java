@@ -1,7 +1,7 @@
 package org.example.work.parse.nodes;
 
 /**
- * 网页DOM文档
+ * 网页DOM文档结构
  */
 public class Document {
     private String charset;

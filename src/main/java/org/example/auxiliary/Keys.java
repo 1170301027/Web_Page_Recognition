@@ -27,7 +27,7 @@ public class Keys {
     };
 
     // HTML head relevant
-    public final String[] HEAD_PROPERTIES = new String[]{
+    public static final String[] HEAD_PROPERTIES = new String[]{
             "style", "title", "script", "base", "Charset", "Content-Type", "Default-Style", "Refresh", "Scheme",
             "Application-Name", "Author", "Description", "Generator", "Keywords", "Alternate", "Archives",
             "Bookmark", "External", "First", "Help", "Icon", "Shortcut Icon", "Last", "License", "Next", "Nofollow",

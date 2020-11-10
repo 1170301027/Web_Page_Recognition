@@ -39,6 +39,10 @@ public class FileKit {
     }
 
     public static void writeAllLines(List<String> list, String fileName) throws IOException{
+        File file = new File(fileName);
+        if (!file.exists()) {
+
+        }
         PrintWriter pw = new PrintWriter(new FileOutputStream(fileName));
         for(String s : list){
             pw.println(s);

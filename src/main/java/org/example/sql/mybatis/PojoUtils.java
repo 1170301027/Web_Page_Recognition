@@ -1,11 +1,11 @@
 package org.example.sql.mybatis;
 
-import com.staui.kit.StringKit;
-import com.staui.wpi.web.annotation.Column;
-import com.staui.wpi.web.annotation.Pk;
-import com.staui.wpi.web.annotation.Table;
-import com.staui.wpi.web.annotation.Transient;
-import com.staui.wpi.web.exception.PojoException;
+
+import org.example.kit.StringKit;
+import org.example.sql.annotation.Column;
+import org.example.sql.annotation.Pk;
+import org.example.sql.annotation.Table;
+import org.example.sql.annotation.Transient;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

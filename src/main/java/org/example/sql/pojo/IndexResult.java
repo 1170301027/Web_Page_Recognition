@@ -19,6 +19,6 @@ public class IndexResult implements Comparable<IndexResult> {
 
     @Override
     public int compareTo(IndexResult o){
-        return (count < o.count) ? 1 : ((count == o.count) ? 0 : -1);
+        return Integer.compare(o.count, count);
     }
 }

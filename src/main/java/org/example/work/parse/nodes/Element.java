@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 元素
+ * 网页元素类-> 继承节点类，实现当前节点的指纹提取。
  */
 public class Element extends Node {
     private static final List<Node> EMPTY_CHILDREN = Collections.emptyList();
@@ -126,6 +126,11 @@ public class Element extends Node {
         return attrs;
     }
 
+    /**
+     * 根据属性key值获取属性value值，如果没有返回空
+     * @param attr
+     * @return
+     */
     public ByteArray attr(String attr){
         for(Attribute a : attrs){
             if(a.isKey(attr))
@@ -172,15 +177,15 @@ public class Element extends Node {
     }
 
     public Node pre(){
-        if(parent == null || index() == 0)
+        if(parent == null || getIndex() == 0)
             return null;
-        return parent.child(index() - 1);
+        return parent.child(getIndex() - 1);
     }
 
     public Node next(){
-        if(parent == null || parent.children().size() - 1 == index())
+        if(parent == null || parent.children().size() - 1 == getIndex())
             return null;
-        return parent.child(index() + 1);
+        return parent.child(getIndex() + 1);
     }
 
     /**
@@ -233,38 +238,38 @@ public class Element extends Node {
 
     @Override
     public String toFpString(){
-        StringBuilder sb = new StringBuilder();
+        StringBuilder stringBulider = new StringBuilder();
         Node t = pre();
         if(!(t instanceof TextNode)){
             for(int i = 0; i < depth; i++){
-                sb.append("\t");
+                stringBulider.append("\t");
             }
         }
-        sb.append("<").append(tag.getName());
+        stringBulider.append("<").append(tag.getName());
         if(attr("class") != null){
-            sb.append(" ");
-            sb.append("class=\"").append(attr("class").toStr()).append("\"");
+            stringBulider.append(" ");
+            stringBulider.append("class=\"").append(attr("class").toStr()).append("\"");
         }else if(attrs.length > 0){
-            sb.append(" ");
-            sb.append(Arrays.toString(attrs).replace(",", "").replaceAll("[\\[\\]]", ""));
+            stringBulider.append(" ");
+            stringBulider.append(Arrays.toString(attrs).replace(",", "").replaceAll("[\\[\\]]", ""));
         }
-        sb.append(">");
+        stringBulider.append(">");
         if(!tag.isEmpty()){
             t = child(0);
             if(t != null && !(t instanceof TextNode))
-                sb.append("\r\n");
+                stringBulider.append("\r\n");
             for(Node childNode : childNodes){
-                sb.append(childNode.toFpString());
+                stringBulider.append(childNode.toFpString());
             }
             if(t != null && !(lastChild() instanceof TextNode))
                 for(int i = 0; i < depth; i++){
-                    sb.append("\t");
+                    stringBulider.append("\t");
                 }
-            sb.append("</").append(tag.getName()).append(">");
+            stringBulider.append("</").append(tag.getName()).append(">");
         }
         t = next();
         if(!(t instanceof TextNode))
-            sb.append("\r\n");
-        return sb.toString();
+            stringBulider.append("\r\n");
+        return stringBulider.toString();
     }
 }
