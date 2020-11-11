@@ -1,10 +1,13 @@
 package org.example.work.main;
 
+import org.example.kit.entity.BiSupplier;
+import org.example.kit.entity.ByteArray;
 import org.example.work.crawl.WebCrawl;
 import org.example.work.parse.Parser;
 import org.example.work.parse.nodes.Document;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
@@ -28,20 +31,10 @@ public class Cache {
     private final String host_url;
 
     public Cache(int threshold, String website) {
+        this.current_thread_pool_size = 0;
         this.threshold = threshold;
         this.website = website;
         this.host_url = "http://"+this.website+"/";
-        init();
-    }
-
-    private void init() {
-        try {
-            Parser parser = new Parser((Objects.requireNonNull(WebCrawl.getHttpPacketLoadedWithHTML(this.host_url))).second());
-            Document document = parser.parse();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 

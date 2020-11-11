@@ -28,7 +28,7 @@ public class WebCrawlTest {
         BiSupplier<URL,byte[]> biSupplier = WebCrawl.getHttpPacketLoadedWithHTML(url);
         assert biSupplier != null;
         System.out.println(biSupplier.first());
-        System.out.println(Arrays.toString(biSupplier.second()));
+        System.out.println(new String(biSupplier.second()));
 
     }
 
