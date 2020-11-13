@@ -7,10 +7,10 @@ import java.util.Arrays;
 
 public class ByteBuffer {
 
-    private byte[] buffer;
+    private final byte[] buffer;
     private int position;
-    private int offset;
-    private int limit;
+    private final int offset;
+    private final int limit;
 
     private int mark;
 
@@ -49,6 +49,9 @@ public class ByteBuffer {
         return position;
     }
 
+    /**
+     * 获取当前字节
+     */
     public byte get(){
         return buffer[position];
     }
@@ -83,7 +86,7 @@ public class ByteBuffer {
      * 可以继续解析
      * @return
      */
-    public boolean goNext(){
+    public boolean canGo(){
         if(++position >= limit){
             position--;
             return false;
@@ -144,6 +147,10 @@ public class ByteBuffer {
         return position;
     }
 
+    /**
+     * 移动到Tag之后的第一个位置
+     * @param tag
+     */
     public void moveAfter(byte tag){
         while(position < limit && buffer[position] != tag)
             position++;
@@ -169,7 +176,9 @@ public class ByteBuffer {
         }
     }
 
-    // 获取下一个非空白字符或其第一个字节
+    /**
+     * 获取下一个非空白字符的下标
+     */
     public int moveToUnblankChar(){
         byte c;
         while(position < limit && ((c = buffer[position]) < 33 && c >= 0))
