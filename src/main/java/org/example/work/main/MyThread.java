@@ -50,7 +50,7 @@ public class MyThread extends Thread{
             ByteArray responseBody = resp.subByteArray(spIndex + 4);
             Parser parser = new Parser(responseBody);
             Document document = parser.parse();
-            extractFingerprint(null,responseHeader,document);
+            ExtractFingerprint.extractFingerprint(null,responseHeader,document);
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
@@ -98,31 +98,31 @@ public class MyThread extends Thread{
         return urls;
     }
 
-    private void extractFingerprint(ByteArray requestHeader, ByteArray responseHeader, Document document) {
-        ByteBuilder fingerprint;
-        byte[] request_fingerprint = new byte[0], response_fingerprint = new byte[0], html_head_fingerprint = new byte[0], html_body_fingerprint = new byte[0];
-        if (requestHeader != null) {
-            // TODO 提取cookie字段
-        }
-        if (responseHeader != null) {
-            response_fingerprint = ExtractFingerprint.handleResponseHeader(new String(responseHeader.getBytes()));
-        }
-        if (document != null) {
-            html_head_fingerprint = ExtractFingerprint.handleHtmlHeader(document.getHtml().childElement("head"));
-            html_body_fingerprint = ExtractFingerprint.handleHtmlBody(document.getHtml().childElement("body"));
-        }
-        int length = request_fingerprint.length + response_fingerprint.length + html_head_fingerprint.length + html_body_fingerprint.length;
-        fingerprint = new ByteBuilder(length);
-        fingerprint.write(request_fingerprint);
-        fingerprint.write(response_fingerprint);
-        fingerprint.write(html_head_fingerprint);
-        fingerprint.write(html_body_fingerprint);
-
-//        Fingerprint fp =  new Fingerprint();
-//        fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
+//    private void extractFingerprint(ByteArray requestHeader, ByteArray responseHeader, Document document) {
+//        ByteBuilder fingerprint;
+//        byte[] request_fingerprint = new byte[0], response_fingerprint = new byte[0], html_head_fingerprint = new byte[0], html_body_fingerprint = new byte[0];
+//        if (requestHeader != null) {
+//            // TODO 提取cookie字段
+//        }
+//        if (responseHeader != null) {
+//            response_fingerprint = ExtractFingerprint.handleResponseHeader(new String(responseHeader.getBytes()));
+//        }
+//        if (document != null) {
+//            html_head_fingerprint = ExtractFingerprint.handleHtmlHeader(document.getHtml().childElement("head"));
+//            html_body_fingerprint = ExtractFingerprint.handleHtmlBody(document.getHtml().childElement("body"));
+//        }
+//        int length = request_fingerprint.length + response_fingerprint.length + html_head_fingerprint.length + html_body_fingerprint.length;
+//        fingerprint = new ByteBuilder(length);
+//        fingerprint.write(request_fingerprint);
+//        fingerprint.write(response_fingerprint);
+//        fingerprint.write(html_head_fingerprint);
+//        fingerprint.write(html_body_fingerprint);
 //
-//        fp.setFpdata(fingerprint.getBytes());
-    }
+////        Fingerprint fp =  new Fingerprint();
+////        fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
+////
+////        fp.setFpdata(fingerprint.getBytes());
+//    }
 
     @Override
     public void run() {

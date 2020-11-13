@@ -31,16 +31,7 @@ public class Main {
         }
     }
 
-    public static void program1() {
-        // TODO 第一个程序
-    }
-
-    public static void program2() {
-        // TODO 第二程程序
-    }
-
     public static void main(String[] args) {
-        program1();
-        //program2();
+        doParse();
     }
 }

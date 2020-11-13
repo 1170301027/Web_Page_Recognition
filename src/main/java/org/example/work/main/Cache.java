@@ -39,6 +39,6 @@ public class Cache {
 
 
     public void run() {
-        while ()
+        while (true);
     }
 }

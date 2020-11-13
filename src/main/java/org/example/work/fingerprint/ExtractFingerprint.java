@@ -6,6 +6,7 @@ import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
 import org.example.work.parse.Attribute;
 import org.example.work.parse.Tag;
+import org.example.work.parse.nodes.Document;
 import org.example.work.parse.nodes.Element;
 import org.example.work.parse.nodes.Node;
 import org.example.work.parse.nodes.TextNode;
@@ -312,4 +313,39 @@ public class ExtractFingerprint {
         // TODO 特征词提取
         return constructFingerprint(HTML_BODY_TAG,new ByteArray(result,0,i).getBytes());
     }
+
+    /**
+     * 提取指纹调度
+     * @param requestHeader 请求头部
+     * @param responseHeader 响应头部
+     * @param document 网页文档--包含解析出来的DOM树（HTML元素为根节点）
+     */
+    public static byte[] extractFingerprint(ByteArray requestHeader, ByteArray responseHeader, Document document) {
+        ByteBuilder fingerprint;
+        byte[] request_fingerprint = new byte[0], response_fingerprint = new byte[0], html_head_fingerprint = new byte[0], html_body_fingerprint = new byte[0];
+        if (requestHeader != null) {
+            // TODO 提取cookie字段
+        }
+        if (responseHeader != null) {
+            response_fingerprint = ExtractFingerprint.handleResponseHeader(new String(responseHeader.getBytes()));
+        }
+        if (document != null) {
+            html_head_fingerprint = ExtractFingerprint.handleHtmlHeader(document.getHtml().childElement("head"));
+            html_body_fingerprint = ExtractFingerprint.handleHtmlBody(document.getHtml().childElement("body"));
+        }
+        int length = request_fingerprint.length + response_fingerprint.length + html_head_fingerprint.length + html_body_fingerprint.length;
+        fingerprint = new ByteBuilder(length);
+        if (request_fingerprint != null)
+            fingerprint.write(request_fingerprint);
+        fingerprint.write(response_fingerprint);
+        fingerprint.write(html_head_fingerprint);
+        fingerprint.write(html_body_fingerprint);
+
+//        Fingerprint fp =  new Fingerprint();
+//        fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
+//
+//        fp.setFpdata(fingerprint.getBytes());
+        return fingerprint.getBytes();
+    }
+
 }
