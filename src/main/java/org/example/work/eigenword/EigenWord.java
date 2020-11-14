@@ -2,7 +2,8 @@ package org.example.work.eigenword;
 
 /**
  * @Classname EigenWord
- * @Description 特征词类  网页Pi （W1，W2,...Wi）
+ * @Description 特征词类W 网页Pi 特征向量（W1，W2,...Wi） 值取词频
+ *          [4bits 标志位][60bits 内容]
  * @Date 2020/11/11 15:01
  * @Created by shuaif
  */
@@ -16,8 +17,9 @@ public class EigenWord implements Comparable<EigenWord>{
     }
 
     public EigenWord(long word, int frequency, int index){
+        assert index > 0;
         this.word = word;
-        this.frequency = (byte)(frequency > 0xFF ? 0xFF : frequency);
+        this.frequency = (byte)(Math.min(frequency, 0xFF));
         this.index = (byte)index;
     }
 
@@ -40,6 +42,10 @@ public class EigenWord implements Comparable<EigenWord>{
     public void addFrequency(){
         if((frequency & 0xFF) < 0xFF)
             frequency = (byte)((frequency & 0xFF) + 1);
+    }
+
+    public void setIndex(int index) {
+        this.index = (byte) index;
     }
 
     @Override

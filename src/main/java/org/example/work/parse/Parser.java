@@ -123,7 +123,7 @@ public class Parser {
 
     /**
      * 解析HTML文档结构。
-     * @param html
+     * @param html html元素节点，DOM树根节点
      * @return
      */
     private boolean handleHTMLStructure(Element html){
@@ -160,6 +160,7 @@ public class Parser {
                 continue;
             }
             if(child instanceof Element && ((Element)child).getTag().isInHead()){
+                System.out.println("add to head");
                 head.appendChild(child);
                 child.setParent(head);
             }else{

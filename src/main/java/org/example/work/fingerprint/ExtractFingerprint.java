@@ -4,6 +4,8 @@ import org.example.auxiliary.Keys;
 import org.example.kit.ByteBuffer;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
+import org.example.work.eigenword.EigenWord;
+import org.example.work.eigenword.ExtractEigenWord;
 import org.example.work.parse.Attribute;
 import org.example.work.parse.Tag;
 import org.example.work.parse.nodes.Document;
@@ -30,7 +32,7 @@ public class ExtractFingerprint {
     public static final int max_child_number_threshold = 200;
     public static final int max_parse_depth = 6;
     /**
-     * BKDR算法实现，将字节数组映射为一个一个字节
+     * BKDR算法实现，将字节数组映射为一个一个字节【辅助】
      * @param byteArray 字节数组对应的字符串
      * @return 字节
      */
@@ -45,7 +47,7 @@ public class ExtractFingerprint {
     }
 
     /**
-     * 构造指纹：指纹头（4bits标志位，12bits指纹体长度） + 指纹体
+     * 构造指纹：指纹头（4bits标志位，12bits指纹体长度） + 指纹体【辅助】
      * @param choice 标志位（0,1,2,3）
      * @param origin_fingerprint 原始指纹
      * @return 指纹
@@ -64,8 +66,6 @@ public class ExtractFingerprint {
         result[1] = length;
         System.arraycopy(origin_fingerprint,0,result,2,origin_fingerprint.length);
         return result;
-
-
     }
 
     /**
@@ -168,13 +168,14 @@ public class ExtractFingerprint {
     public static byte[] handleHtmlHeader(Element html_head){
         byte[] result = new byte[1024];
         int i = 0; // index索引
-
+        System.out.println(html_head.childrenSize());
         for (Node node : html_head.children()) {
             if (!(node instanceof  Element)) {
                 continue;
             }
             Element element = (Element)node;
             Tag tag = element.getTag();
+            System.out.println(tag.getName());
             switch (tag.getName()) {
                 case "meta":
                     // 元数据通常以名称/值存在,如果没有name属性值，那么键值对可能以http-equiv的形式存在
@@ -238,9 +239,10 @@ public class ExtractFingerprint {
     /**
      * 获取网页body部分的指纹，html_body部分的指纹为树形指纹
      * @param html_body body部分的DOM结构
+     * @param vector 网页特征向量
      * @return
      */
-    public static byte[] handleHtmlBody(Element html_body){
+    public static byte[] handleHtmlBody(Element html_body, List<EigenWord> vector){
         if (html_body == null) {
             System.out.println("HTML Body is null");
             return null;
@@ -250,12 +252,13 @@ public class ExtractFingerprint {
         int oldi = i;
 
         Queue<Node> queue = new LinkedList<>(); // 队列用于层序遍历
-        Node[] leaf_nodes; // 存放解析最大深度时候的所有节点（相当于叶子节点），用于特征词提取
+        Node[] leaf_nodes = new Node[0]; // 存放解析最大深度时候的所有节点（相当于叶子节点），用于特征词提取
         queue.offer(html_body);
+        // next_level存放下层节点数，to_be_print存放当前层待访问节点数，node_count记录总访问节点数，用于判断阈值（此间为200）
         int next_level = 0,to_be_printed = 1, node_count = to_be_printed;
         while (!queue.isEmpty()) {
             Node temp = queue.poll();
-            if (temp instanceof Element) {
+            if (temp instanceof Element) { // 对元素节点进行操作
                 Element cur_elment = (Element)temp;
                 int id = cur_elment.getTag().getId();
                 result[i++] = (byte) ((temp == temp.getParent().lastChild() ? 1<<7 : 0) | (id | 0x80));
@@ -267,10 +270,10 @@ public class ExtractFingerprint {
                 int child_count = 0;
                 boolean add_children = true;
                 for (Node child : cur_elment.children()) {
-                    if (child instanceof TextNode || ((Element)child).getTag().isContentLevel())
+                    if (child instanceof TextNode || ((Element)child).getTag().isContentLevel()) // 记录文本相关节点个数
                         child_count++;
                 }
-                if (child_count > 3 && child_count > cur_elment.childrenSize() >> 1) {
+                if (child_count > 3 && child_count > cur_elment.childrenSize() >> 1) { // 文本节点的数量超过三，大量文本后续不做
                     add_children = false;
                 }
 
@@ -281,6 +284,7 @@ public class ExtractFingerprint {
                         child_count++;
                         node_count++;
                         if ((child_count > 29 || node_count > max_child_number_threshold) && child_count < cur_elment.childrenSize()) {
+                            // 节点个数太多，退出当前循环
                             if (child_count > 1) {
                                 queue.offer(cur_elment.lastChild());
                                 child_count++;
@@ -290,32 +294,35 @@ public class ExtractFingerprint {
                     }
                     next_level += child_count;
                 }
-            } else if (temp instanceof TextNode) {
+            } else if (temp instanceof TextNode) { // 对文本节点提取指纹
                 TextNode text = (TextNode)temp;
                 result[i++] = (byte) (temp == temp.getParent().lastChild() ? 1 << 7:0);
                 result[i++] = hashTo1Byte(text.getText().toStr());
                 temp.setHashCode(result[i] << 8);
             }
-            to_be_printed--;
+            to_be_printed--; // 更新待访问节点数目
             if (to_be_printed == 0) {
                 to_be_printed = next_level;
                 next_level = 0;
-                if (i-oldi >= 12) {
+                if (i-oldi >= 12) { // 指纹序列长度大于某阈值，进行指纹提取。
                     // TODO 提取一个特征词
+                    byte[] seq = new ByteArray(result,oldi,i).getBytes();
+                    vector.add(new EigenWord(ExtractEigenWord.hashTo60Bits(seq) ^ (ExtractEigenWord.BODY_LEVEL_TAG << 60)));
                 }
                 oldi = i;
 
-                if (temp.getDepth() + 1 == max_parse_depth) {
+                if (temp.getDepth() + 1 == max_parse_depth) { // 提取所有最大解析深度处的叶子节点，用于路径特征词提取
                     leaf_nodes = queue.toArray(new Node[0]);
                 }
             }
         }
         // TODO 特征词提取
+        vector.addAll(Objects.requireNonNull(ExtractEigenWord.getBodyTreeEigenWord(html_body, leaf_nodes, max_parse_depth)));
         return constructFingerprint(HTML_BODY_TAG,new ByteArray(result,0,i).getBytes());
     }
 
     /**
-     * 提取指纹调度
+     * 提取指纹调度 (只用于测试输出指纹进行比较)
      * @param requestHeader 请求头部
      * @param responseHeader 响应头部
      * @param document 网页文档--包含解析出来的DOM树（HTML元素为根节点）
@@ -331,7 +338,7 @@ public class ExtractFingerprint {
         }
         if (document != null) {
             html_head_fingerprint = ExtractFingerprint.handleHtmlHeader(document.getHtml().childElement("head"));
-            html_body_fingerprint = ExtractFingerprint.handleHtmlBody(document.getHtml().childElement("body"));
+            html_body_fingerprint = ExtractFingerprint.handleHtmlBody(document.getHtml().childElement("body"),new ArrayList<>());
         }
         int length = request_fingerprint.length + response_fingerprint.length + html_head_fingerprint.length + html_body_fingerprint.length;
         fingerprint = new ByteBuilder(length);
@@ -347,5 +354,6 @@ public class ExtractFingerprint {
 //        fp.setFpdata(fingerprint.getBytes());
         return fingerprint.getBytes();
     }
+
 
 }

@@ -3,8 +3,11 @@ package org.example.work.main;
 import org.example.kit.entity.BiSupplier;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
+import org.example.sql.mapper.MatchMapper;
 import org.example.sql.pojo.Fingerprint;
 import org.example.work.crawl.WebCrawl;
+import org.example.work.eigenword.EigenWord;
+import org.example.work.eigenword.ExtractEigenWord;
 import org.example.work.fingerprint.ExtractFingerprint;
 import org.example.work.parse.Parser;
 import org.example.work.parse.nodes.Document;
@@ -18,6 +21,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * @Classname MyThread
@@ -48,9 +52,9 @@ public class MyThread extends Thread{
             Assert.isTrue(spIndex >= 0, "错误的 HTTP 报文格式");
             ByteArray responseHeader = resp.subByteArray(0, spIndex);
             ByteArray responseBody = resp.subByteArray(spIndex + 4);
-            Parser parser = new Parser(responseBody);
-            Document document = parser.parse();
-            ExtractFingerprint.extractFingerprint(null,responseHeader,document);
+
+            Before before = new Before(responseBody, url);
+            extractFingerprintAndEigenWord(null,responseHeader,before);
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
@@ -98,31 +102,48 @@ public class MyThread extends Thread{
         return urls;
     }
 
-//    private void extractFingerprint(ByteArray requestHeader, ByteArray responseHeader, Document document) {
-//        ByteBuilder fingerprint;
-//        byte[] request_fingerprint = new byte[0], response_fingerprint = new byte[0], html_head_fingerprint = new byte[0], html_body_fingerprint = new byte[0];
-//        if (requestHeader != null) {
-//            // TODO 提取cookie字段
-//        }
-//        if (responseHeader != null) {
-//            response_fingerprint = ExtractFingerprint.handleResponseHeader(new String(responseHeader.getBytes()));
-//        }
-//        if (document != null) {
-//            html_head_fingerprint = ExtractFingerprint.handleHtmlHeader(document.getHtml().childElement("head"));
-//            html_body_fingerprint = ExtractFingerprint.handleHtmlBody(document.getHtml().childElement("body"));
-//        }
-//        int length = request_fingerprint.length + response_fingerprint.length + html_head_fingerprint.length + html_body_fingerprint.length;
-//        fingerprint = new ByteBuilder(length);
-//        fingerprint.write(request_fingerprint);
-//        fingerprint.write(response_fingerprint);
-//        fingerprint.write(html_head_fingerprint);
-//        fingerprint.write(html_body_fingerprint);
+    /**
+     * 提取指纹以及网页特征向量
+     * @param requestHeader 请求头部
+     * @param responseHeader 响应头部
+     * @param before 网页预处理结果
+     */
+    private void extractFingerprintAndEigenWord(ByteArray requestHeader, ByteArray responseHeader, Before before) {
+        Document document = before.getDocument();
+        ByteBuilder fingerprint;
+        List<EigenWord> vector = new ArrayList<>();
+        byte[] request_fingerprint = new byte[0], response_fingerprint = new byte[0], html_head_fingerprint = new byte[0], html_body_fingerprint = new byte[0];
+        if (requestHeader != null) {
+            // TODO 提取cookie字段
+        }
+        if (responseHeader != null) {
+            response_fingerprint = ExtractFingerprint.handleResponseHeader(new String(responseHeader.getBytes()));
+            vector.addAll(ExtractEigenWord.getLinearFingerprintEigenWord(response_fingerprint,ExtractEigenWord.RESPONSE_HEADER_TAG));
+        }
+        if (document != null) {
+            html_head_fingerprint = ExtractFingerprint.handleHtmlHeader(document.getHtml().childElement("head"));
+            vector.addAll(ExtractEigenWord.getLinearFingerprintEigenWord(html_head_fingerprint,ExtractEigenWord.HEAD_HTML_TAG));
+            html_body_fingerprint = ExtractFingerprint.handleHtmlBody(document.getHtml().childElement("body"),vector);
+        }
+        // 提取静态特征
+        ExtractEigenWord.getStaticFeatureEigenWord(before,vector);
+        // 拼接指纹
+        int length = request_fingerprint.length + response_fingerprint.length + html_head_fingerprint.length + html_body_fingerprint.length;
+        fingerprint = new ByteBuilder(length);
+        fingerprint.write(request_fingerprint);
+        fingerprint.write(response_fingerprint);
+        fingerprint.write(html_head_fingerprint);
+        fingerprint.write(html_body_fingerprint);
+
+        for (int i = 0; i < vector.size(); i++) {
+            vector.get(i).setIndex(i);
+        }
+
+//        Fingerprint fp =  new Fingerprint();
+//        fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
 //
-////        Fingerprint fp =  new Fingerprint();
-////        fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
-////
-////        fp.setFpdata(fingerprint.getBytes());
-//    }
+//        fp.setFpdata(fingerprint.getBytes());
+    }
 
     @Override
     public void run() {
