@@ -3,6 +3,7 @@ package org.example.work.crawl;
 
 import org.example.kit.StreamKit;
 import org.example.kit.entity.BiSupplier;
+import org.example.kit.entity.ByteArray;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -21,7 +22,7 @@ import java.util.List;
  * @Created by shuaif
  */
 public class WebCrawl {
-
+    public static ByteArray content_encoding = null;
 
     /**
      * 获取指定URL的响应报文数据
@@ -68,7 +69,7 @@ public class WebCrawl {
                 String type = conn.getHeaderField("Content-Type");
                 if(type == null || !type.contains("text/html"))
                     return null;
-
+                content_encoding = new ByteArray(conn.getContentEncoding().getBytes());
                 ByteArrayOutputStream baos = new ByteArrayOutputStream(20 * 1024);
                 for(String header : headers){ //头部数据写入
                     baos.write(header.getBytes());

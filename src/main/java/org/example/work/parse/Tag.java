@@ -102,7 +102,7 @@ public class Tag {
         // HTML 标签，目前共有 124 个
         String[] TAGS = new String[]{
                 // "<!-- -->",
-                // "<!DOCTYPE>",
+                 "!DOCTYPE",
                 "a",          // 定义超文本链接
                 "abbr",       // 定义缩写
                 "acronym",    // 定义只取首字母的缩写，不支持HTML5

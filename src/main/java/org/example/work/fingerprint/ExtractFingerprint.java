@@ -55,10 +55,11 @@ public class ExtractFingerprint {
     public static byte[] constructFingerprint(int choice,byte[] origin_fingerprint){
         byte flag = (byte)(choice << 4);
         byte length;
-        if (origin_fingerprint.length < 0xFF) {
+        System.out.println(origin_fingerprint.length);
+        if (origin_fingerprint.length < 256) {
             length = (byte) (origin_fingerprint.length);
         } else {
-            length = (byte) 0xFF;
+            length = (byte) (0xFF & origin_fingerprint.length);
             flag = (byte) (flag ^ (origin_fingerprint.length >> 8));
         }
         byte[] result = new byte[origin_fingerprint.length + 2];
@@ -122,8 +123,8 @@ public class ExtractFingerprint {
 
     /**
      * 对url字段去除host子串之后提取一个hash值
-     * @param byteArray
-     * @return
+     * @param byteArray URL
+     * @return hash_to_1_byte
      */
     private static byte urlHashTo1Byte(String byteArray) {
         if (byteArray.contains("http")) {
@@ -139,8 +140,8 @@ public class ExtractFingerprint {
 
     /**
      * 根据key值获取ID值，针对HTML head部分的指纹提取
-     * @param key
-     * @return
+     * @param key KEY
+     * @return index
      */
     private static int getIDKey(String key) {
         key = key.toLowerCase();
@@ -168,14 +169,14 @@ public class ExtractFingerprint {
     public static byte[] handleHtmlHeader(Element html_head){
         byte[] result = new byte[1024];
         int i = 0; // index索引
-        System.out.println(html_head.childrenSize());
+//        System.out.println(html_head.childrenSize());
         for (Node node : html_head.children()) {
             if (!(node instanceof  Element)) {
                 continue;
             }
             Element element = (Element)node;
             Tag tag = element.getTag();
-            System.out.println(tag.getName());
+//            System.out.println(tag.getName());
             switch (tag.getName()) {
                 case "meta":
                     // 元数据通常以名称/值存在,如果没有name属性值，那么键值对可能以http-equiv的形式存在
@@ -232,15 +233,17 @@ public class ExtractFingerprint {
                     result[i++] = (byte) element.getTagName().hashCode();
             }
         }
+        System.out.println("i = " + i);
         return constructFingerprint(HTML_HEAD_TAG,new ByteArray(result,0,i).getBytes());
 
     }
 
     /**
      * 获取网页body部分的指纹，html_body部分的指纹为树形指纹
+     * 标签节点[1bit 7bits tagID][1bit 7bits class hash],第一个1bit表示该节点是被否在其兄弟节点中最大，第二个1bit表示是否有孩子节点
+     * 文本节点[1bit 7bit 0x00][8bits text hash]
      * @param html_body body部分的DOM结构
      * @param vector 网页特征向量
-     * @return
      */
     public static byte[] handleHtmlBody(Element html_body, List<EigenWord> vector){
         if (html_body == null) {
@@ -342,8 +345,7 @@ public class ExtractFingerprint {
         }
         int length = request_fingerprint.length + response_fingerprint.length + html_head_fingerprint.length + html_body_fingerprint.length;
         fingerprint = new ByteBuilder(length);
-        if (request_fingerprint != null)
-            fingerprint.write(request_fingerprint);
+        fingerprint.write(request_fingerprint);
         fingerprint.write(response_fingerprint);
         fingerprint.write(html_head_fingerprint);
         fingerprint.write(html_body_fingerprint);

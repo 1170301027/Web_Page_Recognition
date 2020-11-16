@@ -1,16 +1,10 @@
 package org.example.work.main;
 
-import org.example.kit.entity.BiSupplier;
-import org.example.kit.entity.ByteArray;
-import org.example.work.crawl.WebCrawl;
-import org.example.work.parse.Parser;
-import org.example.work.parse.nodes.Document;
+import org.example.auxiliary.FilePath;
+import org.example.kit.FileKit;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -24,21 +18,29 @@ public class Cache {
     private int current_thread_pool_size; // 当前线程池的大小，判断是否可以新建线程
     private final int threshold; // 线程池的阈值
     private Set<MyThread> threads = new CopyOnWriteArraySet<>();
-    private Queue<String> urls_to_crawl = new ConcurrentLinkedQueue<>(); // 待爬取队列
     private int serial_number = 0;
 
-    private final String website;
-    private final String host_url;
-
-    public Cache(int threshold, String website) {
+    private final List<String> websites;
+    public Cache(int threshold) {
         this.current_thread_pool_size = 0;
         this.threshold = threshold;
-        this.website = website;
-        this.host_url = "http://"+this.website+"/";
+        this.websites = new ArrayList<>();
+    }
+
+    public void doParse() {
+        List<String> websites = new ArrayList<>();
+        try {
+            List<String> all_lines = FileKit.getAllLines(FilePath.ALL_WEBSITE);
+            for (String line : all_lines) {
+                websites.add(line.split(",")[1]);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
     public void run() {
-        while (true);
+
     }
 }

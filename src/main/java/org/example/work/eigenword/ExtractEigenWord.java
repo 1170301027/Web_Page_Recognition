@@ -176,8 +176,7 @@ public class ExtractEigenWord {
 
     /**
      * 从网页URL中去除host
-     * @param url
-     * @return
+     * @param url URL
      */
     public static byte[] removeHostFromURL(byte[] url) {
         String URL = new String(url);
@@ -240,7 +239,8 @@ public class ExtractEigenWord {
             if (url == null || url.get(0) == '#')
                 continue;
             if ((url.get(0) == '/' && url.length() > 15) || url.startWith("http".getBytes())) {
-                long hash = hashTo60Bits(removeHostFromURL(url.getBytes())) ^ (hashTo60Bits(element.attr("class").getBytes()) & 0x0F0L);
+                byte[] temp = element.attr("class") == null ? new byte[0] : element.attr("class").getBytes();
+                long hash = hashTo60Bits(removeHostFromURL(url.getBytes())) ^ (hashTo60Bits(temp) & 0x0F0L);
                 words.add(new EigenWord((hash ^ (words_to_get-- & 0x0FL)) ^ (HYPER_LINK << 60)));
             }
             if (words_to_get == 0)

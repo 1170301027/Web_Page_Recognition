@@ -15,23 +15,7 @@ import java.util.List;
  */
 public class Main {
 
-    public static void doParse() {
-        List<String> websites = new ArrayList<>();
-        try {
-            List<String> all_lines = FileKit.getAllLines(FilePath.ALL_WEBSITE);
-            for (String line : all_lines) {
-                 websites.add(line.split(",")[1]);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        for (String website : websites) {
-            Cache cache = new Cache(12,website);
-            cache.run();
-        }
-    }
-
     public static void main(String[] args) {
-        doParse();
+        Cache cache = new Cache(12);
     }
 }

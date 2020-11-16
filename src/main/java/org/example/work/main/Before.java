@@ -1,14 +1,21 @@
 package org.example.work.main;
 
 import org.example.kit.entity.ByteArray;
+import org.example.kit.io.ByteBuilder;
 import org.example.sql.conn.ConnectToMySql;
+import org.example.work.crawl.WorkerException;
 import org.example.work.parse.Parser;
 import org.example.work.parse.nodes.Document;
 import org.example.work.parse.nodes.Node;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.zip.DeflaterInputStream;
+import java.util.zip.GZIPInputStream;
 
 /**
  * @Classname Before
@@ -19,7 +26,9 @@ import java.util.function.Consumer;
 public class Before {
     private Document document;
     private Parser parser;
-    private final ByteArray html_source;
+    private ByteArray html_source;
+    private long gziptime;
+    private final ByteArray CONTENT_ENCODING;
     private int max_parse_depth;
     private String url;
     private ConnectToMySql sql;
@@ -56,9 +65,10 @@ public class Before {
         return forms;
     }
 
-    public Before(ByteArray html_source, String url) {
+    public Before(ByteArray html_source, String url, ByteArray content_encoding) {
         this.html_source = html_source;
         this.url = url;
+        this.CONTENT_ENCODING = content_encoding;
         parseHTML();
         this.sql = new ConnectToMySql();
     }
@@ -67,23 +77,76 @@ public class Before {
      * 网页解析期间根据标签做出相应的动作
      */
     private void parseHTML(){
+        System.out.println("before : " + CONTENT_ENCODING.toStr());
+        handleContentEncoding(this.CONTENT_ENCODING);
         html_source.handleUnicodeIdentifier();
         parser = new Parser(html_source);
 
         parser.addAction("a", hyper_links::add);
-        parser.addAction("link", hyper_links::add);
 
         parser.addAction("form", forms::add);
 
         Consumer<Node> resAct = resources::add;
 
         parser.addAction("img", resAct);
+        parser.addAction("link", resAct);
+
         parser.addAction("script", a -> {
             resources.add(a);
         });
 
         document = parser.parse();
         max_parse_depth = parser.getMaxParsingDepth();
+
+        System.out.println("static resources : ");
+        System.out.println(resources.size());
+        System.out.println(forms.size());
+        System.out.println(hyper_links.size());
+    }
+
+    /**
+     * 处理文档编码以及解压缩的问题
+     * @param encoding content-encoding字段value
+     */
+    void handleContentEncoding(ByteArray encoding){
+        long start = System.nanoTime();
+        switch(encoding.toStr().toLowerCase()){
+            case "gzip":{
+                ByteArrayInputStream in = new ByteArrayInputStream(html_source.getParentBytes(), html_source.from(), html_source.length());
+                try{
+                    html_source = decompress(new GZIPInputStream(in, 128));
+                }catch(IOException e){
+                    throw new WorkerException("HTML 解压缩过程失败 " + e.getMessage(), e);
+                }
+                gziptime = System.nanoTime() - start;
+                break;
+            }
+            case "deflate":{
+                ByteArrayInputStream in = new ByteArrayInputStream(html_source.getParentBytes(), html_source.from(), html_source.length());
+                try{
+                    html_source = decompress(new DeflaterInputStream(in));
+                }catch(IOException e){
+                    throw new WorkerException("HTML 解压缩过程失败 " + e.getMessage(), e);
+                }
+                gziptime = System.nanoTime() - start;
+                break;
+            }
+            default:{
+                // 网页中该字段值有 plain identity br x-gzip ISO-8859-1 utf-8 text 空 UTF8 GB2312 xxxxxxxxxxxxx GZIP binary Windows-1251，这些都是错的
+//            throw new WorkerException("系统不支持 \"" + encoding.toStr() + "\" 解压缩！");
+                break;
+            }
+        }
+    }
+
+    private ByteArray decompress(InputStream decompress) throws IOException{
+        ByteBuilder out = new ByteBuilder((html_source.length() << 1) + (html_source.length() >>> 1));
+        byte[] buffer = new byte[128];
+        int n;
+        while((n = decompress.read(buffer)) > 0){
+            out.write(buffer, 0, n);
+        }
+        return out.toByteArray();
     }
 
 }

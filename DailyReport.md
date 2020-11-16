@@ -42,3 +42,6 @@ System.setProperty("http.proxyPort","10809");
 
 ## 2020/11/15
 Mybatis配置，测试
+
+## 2020/11/16
+debug，测试单个网页指纹和特征提取。

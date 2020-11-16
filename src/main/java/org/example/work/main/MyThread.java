@@ -3,13 +3,10 @@ package org.example.work.main;
 import org.example.kit.entity.BiSupplier;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
-import org.example.sql.mapper.MatchMapper;
-import org.example.sql.pojo.Fingerprint;
 import org.example.work.crawl.WebCrawl;
 import org.example.work.eigenword.EigenWord;
 import org.example.work.eigenword.ExtractEigenWord;
 import org.example.work.fingerprint.ExtractFingerprint;
-import org.example.work.parse.Parser;
 import org.example.work.parse.nodes.Document;
 import org.example.work.parse.nodes.Element;
 import org.example.work.parse.nodes.Node;
@@ -19,29 +16,36 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.sql.Timestamp;
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * @Classname MyThread
- * @Description
+ * @Description 线程，
  * @Date 2020/11/10 20:26
  * @Created by shuaif
  */
 public class MyThread extends Thread{
     private final int serial_number;
-    private Set<String> urls;
+    private final String website;
+    private Queue<String> urls;
 
-    public MyThread(int serial_number, Set<String> urls) {
+    public MyThread(int serial_number,String website) {
         this.serial_number = serial_number;
-        this.urls = urls;
+        this.website = website;
+        this.urls = new LinkedList<>();
     }
 
     private void crawl(String url) {
+        System.out.println(url);
         try {
             BiSupplier<URL,byte[]> response = Objects.requireNonNull(WebCrawl.getHttpPacketLoadedWithHTML(url));
             byte[] data = response.second();
+
+            ByteArray content_encoding = null;
+            if (WebCrawl.content_encoding != null) {
+                content_encoding = WebCrawl.content_encoding;
+            }
+
             String head = "HTTP/1.1 200 OK\r\n";
             ByteBuilder builder = new ByteBuilder(data.length + head.length());
             builder.write(head.getBytes());
@@ -53,8 +57,13 @@ public class MyThread extends Thread{
             ByteArray responseHeader = resp.subByteArray(0, spIndex);
             ByteArray responseBody = resp.subByteArray(spIndex + 4);
 
-            Before before = new Before(responseBody, url);
+            Before before = new Before(responseBody, url, content_encoding);
             extractFingerprintAndEigenWord(null,responseHeader,before);
+            for (String new_url : getNewUrls(uri, before.getHyper_links().toArray(new Node[0]))) {
+                if (!urls.contains(new_url)) {
+                    urls.offer(new_url);
+                }
+            }
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
@@ -108,7 +117,7 @@ public class MyThread extends Thread{
      * @param responseHeader 响应头部
      * @param before 网页预处理结果
      */
-    private void extractFingerprintAndEigenWord(ByteArray requestHeader, ByteArray responseHeader, Before before) {
+    public void extractFingerprintAndEigenWord(ByteArray requestHeader, ByteArray responseHeader, Before before) {
         Document document = before.getDocument();
         ByteBuilder fingerprint;
         List<EigenWord> vector = new ArrayList<>();
@@ -139,9 +148,13 @@ public class MyThread extends Thread{
             vector.get(i).setIndex(i);
         }
 
-
+        for (byte b : fingerprint.getBytes()) {
+            System.out.printf("%02x ",b);
+        }
+        System.out.println();
+        System.out.println(vector.size());
         for (EigenWord eigenWord : vector) {
-            System.out.printf(" %x , %d\n",eigenWord.getWord(),(Integer)eigenWord.getFrequency());
+            System.out.printf(" %x , %d\n",eigenWord.getWord(), eigenWord.getFrequency());
         }
 
 //        Fingerprint fp =  new Fingerprint();
@@ -153,6 +166,12 @@ public class MyThread extends Thread{
     @Override
     public void run() {
         super.run();
+        String host_url = "http://" + this.website + "/";
+        this.urls.offer(host_url);
+        while (this.urls != null) {
+            String url = this.urls.poll();
+            crawl(url);
 
-    }
+        }
+     }
 }

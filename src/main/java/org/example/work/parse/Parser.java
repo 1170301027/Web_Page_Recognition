@@ -8,6 +8,7 @@ import org.example.work.parse.nodes.Element;
 import org.example.work.parse.nodes.Node;
 import org.example.work.parse.nodes.TextNode;
 
+import javax.sound.midi.Soundbank;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -74,6 +75,16 @@ public class Parser {
 
     private void parseDOCTYPE(){
         // doctype解析
+        String doctype = "<!DOCTYPE html>";
+        byte[] temp = doctype.getBytes();
+        ByteArray byteArray = new ByteArray( buffer.array() );
+        byteArray.indexOf(temp);
+        if (!buffer.hasNext(TAG_START_FLAG)) return;
+        String name = getTagName();
+        assert name != null;
+        if (name.equals("DOCTYPE")) {
+            buffer.moveTo(TAG_END_FLAG);
+        }
     }
 
     private Element parseHTML(){
@@ -153,12 +164,17 @@ public class Parser {
         }
         if(size == 2)
             return true;
+//        int i=0;
         // 针对html节点下的子节点，除了head和body节点的其他节点加入到对应的head和body节点下。
         for(Iterator<Node> it = html.children().iterator(); it.hasNext(); ){
             Node child = it.next();
             if(child == head || child == body){
                 continue;
             }
+//            System.out.println(i++);
+//            if (child instanceof Element) {
+//                System.out.println(((Element)child).getTag());
+//            }
             if(child instanceof Element && ((Element)child).getTag().isInHead()){
                 System.out.println("add to head");
                 head.appendChild(child);
