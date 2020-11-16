@@ -1,6 +1,7 @@
 package org.example.work.main;
 
 import org.example.kit.entity.ByteArray;
+import org.example.sql.conn.ConnectToMySql;
 import org.example.work.parse.Parser;
 import org.example.work.parse.nodes.Document;
 import org.example.work.parse.nodes.Node;
@@ -21,6 +22,7 @@ public class Before {
     private final ByteArray html_source;
     private int max_parse_depth;
     private String url;
+    private ConnectToMySql sql;
 
     private List<Node> resources = new ArrayList<>();                 // 网页引用的资源：CSS文件、JavaScript文件、图片、音频、视频等等，iframe需要特殊分析
     private List<Node> hyper_links = new ArrayList<>(25); // 网页中的超链接：开头为 "http://"、"https://"、"/"、"../"、"//"等
@@ -58,6 +60,7 @@ public class Before {
         this.html_source = html_source;
         this.url = url;
         parseHTML();
+        this.sql = new ConnectToMySql();
     }
 
     /**

@@ -139,6 +139,11 @@ public class MyThread extends Thread{
             vector.get(i).setIndex(i);
         }
 
+
+        for (EigenWord eigenWord : vector) {
+            System.out.printf(" %x , %d\n",eigenWord.getWord(),(Integer)eigenWord.getFrequency());
+        }
+
 //        Fingerprint fp =  new Fingerprint();
 //        fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
 //

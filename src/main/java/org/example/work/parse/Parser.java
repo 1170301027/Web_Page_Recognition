@@ -87,7 +87,7 @@ public class Parser {
                 String name = getTagName();
                 if(name == null){
                     break;
-                }else if(!name.equals("html")){ // <html 匹配
+                }else if(!name.equals("html")){ // <html 匹配，把非HTML节点的元素加到HTML节点的子节点中
                     if(name.charAt(0) == TAG_CLOSING_FLAG){
                         if(buffer.noNext(TAG_END_FLAG))
                             break;
@@ -165,7 +165,7 @@ public class Parser {
                 child.setParent(head);
             }else{
                 body.appendChild(child);
-                child.setParent(head);
+                child.setParent(body);
             }
             child.updateIndex();
             it.remove();
@@ -319,7 +319,7 @@ public class Parser {
      * @return
      */
     private Attribute[] getAttributesFromTag(){
-        buffer.moveToUnblankChar();
+        buffer.moveToUnblankChar(); // 跳过空白字符
         if(buffer.get() == '>'){ // 标签结束，没有属性
             return null;
         }

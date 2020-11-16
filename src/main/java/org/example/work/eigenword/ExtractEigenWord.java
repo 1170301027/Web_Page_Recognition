@@ -1,12 +1,9 @@
 package org.example.work.eigenword;
 
-import org.example.kit.ByteBuffer;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
 import org.example.kit.security.MD5;
-import org.example.work.crawl.WorkerException;
 import org.example.work.main.Before;
-import org.example.work.parse.Attribute;
 import org.example.work.parse.Tag;
 import org.example.work.parse.nodes.Element;
 import org.example.work.parse.nodes.Node;

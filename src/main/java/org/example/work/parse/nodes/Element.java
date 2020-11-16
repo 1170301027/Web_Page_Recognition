@@ -139,17 +139,6 @@ public class Element extends Node {
         return null;
     }
 
-    public boolean hasAttrValue(String val){
-        boolean has = false;
-        for(Attribute attr : attrs){
-            if(attr.isValue(val)){
-                has = true;
-                break;
-            }
-        }
-        return has;
-    }
-
     public void setAttrs(Attribute[] attrs){
         if(attrs == null || attrs.length == 0)
             return;

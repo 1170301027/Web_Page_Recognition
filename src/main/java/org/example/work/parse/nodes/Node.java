@@ -35,7 +35,7 @@ public abstract class Node {
 
     @Override
     public int hashCode(){
-        return index & 0x00_FF_FF_FF;
+        return index & 0x00_FF_FF_FF; // 清零？
     }
 
     public boolean hasHashCode(){

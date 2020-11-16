@@ -8,7 +8,7 @@ package org.example.work.eigenword;
  * @Created by shuaif
  */
 public class EigenWord implements Comparable<EigenWord>{
-    private long word; // 特征值
+    private final long word; // 特征值
     private byte index; // 特征值在网页特征向量中的索引
     private byte frequency; // 词频
 
@@ -17,7 +17,7 @@ public class EigenWord implements Comparable<EigenWord>{
     }
 
     public EigenWord(long word, int frequency, int index){
-        assert index > 0;
+        assert index >= 0;
         this.word = word;
         this.frequency = (byte)(Math.min(frequency, 0xFF));
         this.index = (byte)index;

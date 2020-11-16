@@ -28,7 +28,7 @@ public class ImportFpAndWords {
 
     @Before
     public void setUp() throws Exception{
-        String resource = "TestMybatisConfig.xml";
+        String resource = "MybatisConfig.xml";
         InputStream inputStream = Resources.getResourceAsStream(resource);
         SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
         sqlSession = sqlSessionFactory.openSession();
