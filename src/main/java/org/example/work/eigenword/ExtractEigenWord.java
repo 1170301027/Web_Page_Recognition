@@ -182,10 +182,12 @@ public class ExtractEigenWord {
         String URL = new String(url);
         StringBuilder result = new StringBuilder();
         if (URL.contains("http")) {
-            String[] splits = URL.split("/");
-            for (int i = 1; i < splits.length; i++) {
+            String[] splits = URL.split("//");
+            splits = splits[1].split("/");
+            for (int i = 1 ; i < splits.length; i++) { // http:_ _host_path
                 result.append("/").append(splits[i]);
             }
+            System.out.println("result : " + result.toString());
             return result.toString().getBytes();
         }
         return url;
@@ -239,6 +241,7 @@ public class ExtractEigenWord {
             if (url == null || url.get(0) == '#')
                 continue;
             if ((url.get(0) == '/' && url.length() > 15) || url.startWith("http".getBytes())) {
+                System.out.println("做特征词提取：" + url.toStr());
                 byte[] temp = element.attr("class") == null ? new byte[0] : element.attr("class").getBytes();
                 long hash = hashTo60Bits(removeHostFromURL(url.getBytes())) ^ (hashTo60Bits(temp) & 0x0F0L);
                 words.add(new EigenWord((hash ^ (words_to_get-- & 0x0FL)) ^ (HYPER_LINK << 60)));

@@ -378,6 +378,9 @@ public class Parser {
     public void extractURLs(Attribute attribute) {
         if (attribute.isKey("href")) {
             String val = attribute.getValue().toStr();
+            if (val.startsWith("#")) {
+                return;
+            }
             this.urls.add(val);
         }
     }

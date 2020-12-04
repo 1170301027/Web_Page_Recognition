@@ -95,6 +95,10 @@ public class ParserTest {
             ByteArray responseBody = resp.subByteArray(spIndex + 4);
             Before before = new Before(responseBody,url_news,content_encoding);
             Document document = before.getDocument();
+            System.out.println("hyper links : ");
+            for (String s : before.getParser().getUrls()) {
+                System.out.println(s);
+            }
             new MyThread(0,null).extractFingerprintAndEigenWord(null,responseHeader,before);
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();

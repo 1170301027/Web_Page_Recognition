@@ -59,7 +59,10 @@ public class MyThread extends Thread{
 
             Before before = new Before(responseBody, url, content_encoding);
             extractFingerprintAndEigenWord(null,responseHeader,before);
-            for (String new_url : getNewUrls(uri, before.getHyper_links().toArray(new Node[0]))) {
+            for (String new_url : before.getParser().getUrls()) {
+                if (new_url.startsWith("/")) {
+                    new_url = "http://" + website + new_url;
+                }
                 if (!urls.contains(new_url)) {
                     urls.offer(new_url);
                 }
@@ -67,48 +70,6 @@ public class MyThread extends Thread{
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
-    }
-
-    public Set<String> getNewUrls(URI uri, Node[] as){
-        if(as.length == 0)
-            return Collections.emptySet();
-        Set<String> urls = new HashSet<>();
-        Map<Integer,String> map = new HashMap<>();
-        for(Node node : as){
-            Element a = (Element)node;
-            if(a.attr("href") == null)
-                continue;
-            String s = a.attr("href").toStr().trim();
-            if(s.startsWith("https://"))
-                s = s.replaceFirst("https://", "http://");
-            else if(!s.startsWith("/") || s.startsWith("//") || s.endsWith(".pdf"))
-                continue;
-            s = s.indexOf('?') == -1 ? s : s.substring(0, s.indexOf('?'));
-            int index = s.indexOf('/', 8), count = 0;
-            while(index >= 0){
-                count++;
-                index = s.indexOf('/', index + 1);
-            }
-            if(s.startsWith("/") && count > 1 && !map.containsKey(count)){
-                try{
-                    map.put(count, uri.resolve(s).toString());
-                }catch(Exception e){
-                }
-            }else if(count == 0 || (count == 1 && s.endsWith("/"))){
-                try{
-                    String newu = uri.resolve(s).getHost();
-                    if(!newu.equals(uri.getHost()) && newu.contains(uri.getHost().replace("www.", "")))
-                        urls.add(s);
-                }catch(Exception e){
-                }
-            }
-        }
-        List<Map.Entry<Integer,String>> es = new ArrayList<>(map.entrySet());
-        es.sort((a, b) -> -Integer.compare(a.getKey(), b.getKey()));
-        for(Map.Entry<Integer,String> e : es){
-            urls.add(e.getValue());
-        }
-        return urls;
     }
 
     /**
