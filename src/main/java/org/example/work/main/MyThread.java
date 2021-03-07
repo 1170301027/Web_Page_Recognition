@@ -1,21 +1,25 @@
 package org.example.work.main;
 
+import net.sf.json.JSONObject;
 import org.example.auxiliary.FilePath;
 import org.example.kit.FileKit;
 import org.example.kit.entity.BiSupplier;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
+import org.example.sql.conn.ConnectToMySql;
+import org.example.sql.mapper.MatchMapper;
+import org.example.sql.pojo.Fingerprint;
+import org.example.sql.pojo.InvertedIndex;
 import org.example.work.crawl.WebCrawl;
 import org.example.work.eigenword.EigenWord;
 import org.example.work.eigenword.ExtractEigenWord;
 import org.example.work.fingerprint.ExtractFingerprint;
 import org.example.work.parse.nodes.Document;
-import org.example.work.parse.nodes.Element;
-import org.example.work.parse.nodes.Node;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.net.*;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -30,7 +34,13 @@ public class MyThread extends Thread{
     private Queue<String> urls;
     private int threshold = 100; // 指定一个网站爬取网页的最大数量。
     private int count = 0;
+    private ConnectToMySql conn;
 
+    public MyThread() {
+        this.serial_number = 0;
+        this.website = "0.0";
+        this.conn = new ConnectToMySql();
+    }
     public MyThread(int serial_number,String website) {
         this.serial_number = serial_number;
         this.website = website;
@@ -98,12 +108,65 @@ public class MyThread extends Thread{
     }
 
     /**
+     * 从文件中读取报文数据并解析建立指纹特征库，
+     */
+    public void buildFpAndWordsLib() {
+        List<JSONObject> jsonList = new ArrayList<>(); // json列表
+        String filePath = FilePath.ROOT_PATH + "index.data"; // 读取源文件
+        int start_line = 0;
+        int threshold = 75000 ; // 限定一次读入内存最大数据
+        String last_page = FileKit.readALineFromFile(FilePath.LAST_PAGE_ID);
+        int page_id = 0;
+        if (last_page != null)  page_id = Integer.parseInt(last_page);
+        do {
+            jsonList.clear();
+            start_line = FileKit.readPacket(jsonList,filePath,start_line,threshold);
+            for (JSONObject jo : jsonList) {
+                String url = jo.getString("url");
+                byte[] data = jo.getString("data").getBytes();
+                doParseAndExtract(url,data,page_id++);
+            }
+        } while (jsonList.size() < threshold);
+        FileKit.writeALineToFile(String.valueOf(page_id),FilePath.LAST_PAGE_ID);
+    }
+
+    /**
+     * 从文件中读取DNS相关信息并建立IP——HOST库
+     */
+    private void buildIpAndHostLib() {
+
+    }
+
+    /**
+     * 做报文解析和特征提取
+     * @param url -
+     * @param data -响应报文
+     */
+    public void doParseAndExtract(String url, byte[] data, int page_id) {
+        System.out.println("URL : " + url);
+        String head = "HTTP/1.1 200 OK\r\n";
+        ByteBuilder builder = new ByteBuilder(data.length + head.length());
+        builder.write(head.getBytes());
+        builder.write(data);
+        ByteArray resp = new ByteArray(builder.getBytes());
+        int spIndex = resp.indexOf(new byte[]{'\r', '\n', '\r', '\n'});
+        Assert.isTrue(spIndex >= 0, "错误的 HTTP 报文格式");
+        ByteArray responseHeader = resp.subByteArray(0, spIndex);
+        ByteArray responseBody = resp.subByteArray(spIndex + 4);
+
+        ByteArray content_encoding = new ByteArray("gzip".getBytes());
+        Before before = new Before(responseBody, url, content_encoding);
+        extractFingerprintAndEigenWord(null,responseHeader,before,page_id);
+    }
+
+
+    /**
      * 提取指纹以及网页特征向量
      * @param requestHeader 请求头部
      * @param responseHeader 响应头部
      * @param before 网页预处理结果
      */
-    public void extractFingerprintAndEigenWord(ByteArray requestHeader, ByteArray responseHeader, Before before) {
+    public void extractFingerprintAndEigenWord(ByteArray requestHeader, ByteArray responseHeader, Before before , int page_id) {
         Document document = before.getDocument();
         ByteBuilder fingerprint;
         List<EigenWord> vector = new ArrayList<>();
@@ -138,12 +201,27 @@ public class MyThread extends Thread{
             System.out.printf("%02x ",b);
         }
         System.out.println();
-        System.out.println(vector.size());
+        System.out.println("words size : " + vector.size());
+        List<InvertedIndex> words = new ArrayList<>();
         for (EigenWord eigenWord : vector) {
-            System.out.printf(" %x , %d\n",eigenWord.getWord(), eigenWord.getFrequency());
+//            System.out.printf(" %x , %d\n",eigenWord.getWord(), eigenWord.getFrequency());
+            InvertedIndex invertedIndex = new InvertedIndex();
+            invertedIndex.setPageId(page_id);
+            invertedIndex.setWord(eigenWord.getWord());
+            invertedIndex.setFrequency(eigenWord.getFrequency());
+            invertedIndex.setIndex(eigenWord.getIndex());
+            words.add(invertedIndex);
         }
 
-//        Fingerprint fp =  new Fingerprint();
+        Fingerprint fp =  new Fingerprint();
+        fp.setFpdata(fingerprint.getBytes());
+        fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
+        fp.setPageId(page_id);
+
+        conn.insertFingerprint(Collections.singletonList(fp));
+        conn.insertEigenWord(words);
+
+
 //        fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
 //
 //        fp.setFpdata(fingerprint.getBytes());

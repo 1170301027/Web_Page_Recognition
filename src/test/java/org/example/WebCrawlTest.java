@@ -26,7 +26,6 @@ public class WebCrawlTest {
     public void testGetHttpPackageWithHtml() throws IOException {
 
         BiSupplier<URL,byte[]> biSupplier = WebCrawl.getHttpPacketLoadedWithHTML(url);
-        assert biSupplier != null;
         System.out.println(biSupplier.first());
         System.out.println(new String(biSupplier.second()));
         FileKit.writePacket(url,biSupplier.second());

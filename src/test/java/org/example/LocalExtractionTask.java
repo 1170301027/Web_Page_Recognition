@@ -7,7 +7,6 @@ import org.example.kit.entity.ByteArray;
 import org.example.sql.pojo.Fingerprint;
 import org.example.sql.pojo.InvertedIndex;
 import org.example.work.eigenword.EigenWord;
-import sun.swing.FilePane;
 
 import java.io.File;
 import java.io.IOException;

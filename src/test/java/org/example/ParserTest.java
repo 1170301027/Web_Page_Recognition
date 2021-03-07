@@ -99,7 +99,7 @@ public class ParserTest {
             for (String s : before.getParser().getUrls()) {
                 System.out.println(s);
             }
-            new MyThread(0,null).extractFingerprintAndEigenWord(null,responseHeader,before);
+            new MyThread(0,null).extractFingerprintAndEigenWord(null,responseHeader,before,0);
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }

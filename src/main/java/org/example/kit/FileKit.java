@@ -1,6 +1,5 @@
 package org.example.kit;
 
-import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.example.auxiliary.FilePath;
@@ -9,7 +8,6 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,15 +91,58 @@ public class FileKit {
 
     }
 
+    public static void writeALineToFile(String content, String fileName) {
+        File file = new File(fileName);
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
+            bw.write(content);
+            bw.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("写入文件失败");
+        } catch (IOException e) {
+            System.out.println("创建文件失败");
+        }
+    }
+
+    public static String readALineFromFile(String fileName) {
+        File file = new File(fileName);
+        String result = null;
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            result = br.readLine();
+            br.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     /**
-     * 从文件中读取packet
+     * 从文件中读取数据，写入JSONObject
+     * @param jsonList - JSON格式列表
+     * @param filePath - 报文存储路径。
+     * @param startLine - 开始读取行号
+     * @param threshold - 限定最大读入数据
+     * @return 结束行。
      */
-    public static void readPacket(List<JSONObject> jsonList) {
-        File file = new File(FilePath.ROOT_PATH + "index.data");
+    public static int readPacket(List<JSONObject> jsonList, String filePath, int startLine, int threshold) {
+        File file = new File(filePath);
+        int count  = startLine;
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             String line;
+            while (count > 0) {
+                br.readLine();
+                count--;
+            }
+            count = startLine;
             while ((line = br.readLine()) != null) {
+                count ++;
                 if (line.equals(TAG_SEPARATOR)) {
                     continue;
                 }
@@ -111,12 +152,14 @@ public class FileKit {
                 } catch (JSONException | NumberFormatException e) {
                     System.out.println("json 解析异常。");
                 }
+                if (jsonList.size() >= threshold) break; // 一次最多读入75000条。
             }
-            System.out.println(jsonList.size());
+            System.out.println("读取JSON数据 ：" + jsonList.size());
             br.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return count;
     }
 
     public static void writeAllLines(List<String> list, String fileName, String charset) throws IOException{

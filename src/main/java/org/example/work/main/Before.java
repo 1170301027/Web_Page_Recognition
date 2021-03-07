@@ -12,6 +12,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.zip.DeflaterInputStream;
@@ -77,7 +78,7 @@ public class Before {
      * 网页解析期间根据标签做出相应的动作
      */
     private void parseHTML(){
-        System.out.println("before - content_encoding : " + CONTENT_ENCODING.toStr());
+//        System.out.println("before - content_encoding : " + CONTENT_ENCODING.toStr());
         handleContentEncoding(this.CONTENT_ENCODING);
         html_source.handleUnicodeIdentifier();
         parser = new Parser(html_source);
@@ -117,7 +118,8 @@ public class Before {
                 try{
                     html_source = decompress(new GZIPInputStream(in, 128));
                 }catch(IOException e){
-                    throw new WorkerException("HTML 解压缩过程失败 " + e.getMessage(), e);
+//                    System.out.println(Arrays.toString(html_source.getBytes()));
+//                    throw new WorkerException("HTML 解压缩过程失败 " + e.getMessage(), e);
                 }
                 gziptime = System.nanoTime() - start;
                 break;

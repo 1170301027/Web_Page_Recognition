@@ -8,8 +8,12 @@ package org.example.work.main;
  */
 public class Main {
 
-    public static void main(String[] args) {
+    private static void doCrawl() {
         ThreadPool threadPool = new ThreadPool(12);
         threadPool.run();
+    }
+
+    public static void main(String[] args) {
+        doCrawl();
     }
 }

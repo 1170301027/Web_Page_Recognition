@@ -10,7 +10,9 @@ import org.jsoup.nodes.Document;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +36,22 @@ public class WebCrawl {
         // 系统代理
         System.setProperty("http.proxyHost","127.0.0.1");
         System.setProperty("http.proxyPort","10809");
+//        System.setProperty("socksProxyHost", "127.0.0.1");
+//        System.setProperty("socksProxyPort", "1081");
+//        class MyAuthenticator extends Authenticator {
+//            private String user = "";
+//            private String password = "";
+//
+//            public MyAuthenticator(String user, String password) {
+//                this.user = user;
+//                this.password = password;
+//            }
+//
+//            protected PasswordAuthentication getPasswordAuthentication() {
+//                return new PasswordAuthentication(user, password.toCharArray());
+//            }
+//        }
+//        Authenticator.setDefault(new MyAuthenticator("user","password"));
 
         if (httpURL == null) {return null;}
         if (!httpURL.contains("http")) {

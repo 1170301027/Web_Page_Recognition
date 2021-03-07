@@ -31,6 +31,10 @@ public class MD5 {
         varD = 0x10325476;
     }
 
+    public static int[] getK() {
+        return K;
+    }
+
     private int shift(int num, int shift){
         return (num << shift) | (num >>> (32 - shift));
     }

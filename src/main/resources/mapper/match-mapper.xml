@@ -32,9 +32,9 @@
     </insert>
 
     <insert id="insertFeatureWords">
-        INSERT INTO inverted_index (page_id,word) VALUES
+        INSERT INTO inverted_index (page_id,word,index,frequency) VALUES
         <foreach collection="list" item="s" separator=",">
-            (#{s.pageId},#{s.word})
+            (#{s.pageId},#{s.word},#{s.index},#{s.frequency})
         </foreach>
     </insert>
 

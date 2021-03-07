@@ -5,14 +5,20 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.example.auxiliary.FilePath;
 import org.example.kit.FileKit;
+import org.example.kit.entity.ByteArray;
+import org.example.kit.io.ByteBuilder;
 import org.example.sql.mapper.MatchMapper;
 import org.example.sql.pojo.Fingerprint;
+import org.example.work.main.MyThread;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.util.Assert;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,6 +71,18 @@ public class MyBatisTest {
     @Test
     public void readDataAndInsert() {
         List<JSONObject> jsonList = new ArrayList<>();
-        FileKit.readPacket(jsonList);
+        String filePath = FilePath.ROOT_PATH + "index.data";
+        FileKit.readPacket(jsonList,filePath,0,1);
+        MyThread test = new MyThread();
+        JSONObject jo = jsonList.get(0);
+        String url = jo.getString("url");
+        byte[] data = jo.getString("data").getBytes();
+        test.doParseAndExtract(url,data,110);
+    }
+
+    @Test
+    public void buildFpAndWordsLib() {
+        MyThread myThread = new MyThread();
+        myThread.buildFpAndWordsLib();
     }
 }

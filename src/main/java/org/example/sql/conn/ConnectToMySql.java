@@ -53,8 +53,11 @@ public class ConnectToMySql {
         matchMapper = session.getMapper(MatchMapper.class);
     }
 
-    public void dispose() {
+    public void commit() {
         session.commit();
+    }
+
+    public void dispose() {
         //释放资源
         session.close();
         try {
@@ -69,6 +72,7 @@ public class ConnectToMySql {
             return ;
         }
         matchMapper.insertFingerprints(fingerprints);
+        commit();
     }
 
     public void insertEigenWord(List<InvertedIndex> words) {
@@ -76,6 +80,7 @@ public class ConnectToMySql {
             return ;
         }
         matchMapper.insertFeatureWords(words);
+        commit();
     }
 
     public void insertIptoHost(List<IptoHost> iptoHosts) {
@@ -83,6 +88,7 @@ public class ConnectToMySql {
             return ;
         }
         matchMapper.insertIptoHost(iptoHosts);
+        commit();
     }
 
     public String findHostbyIp(String ip) {

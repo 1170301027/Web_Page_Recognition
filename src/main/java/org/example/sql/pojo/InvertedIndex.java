@@ -5,6 +5,9 @@ import org.example.sql.annotation.Table;
 
 import java.io.Serializable;
 
+/**
+ * 倒排索引，
+ */
 @Table
 public class InvertedIndex implements Serializable {
 

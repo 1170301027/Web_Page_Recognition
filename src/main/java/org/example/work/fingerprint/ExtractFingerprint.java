@@ -1,20 +1,16 @@
 package org.example.work.fingerprint;
 
 import org.example.auxiliary.Keys;
-import org.example.kit.ByteBuffer;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
 import org.example.work.eigenword.EigenWord;
 import org.example.work.eigenword.ExtractEigenWord;
-import org.example.work.parse.Attribute;
 import org.example.work.parse.Tag;
 import org.example.work.parse.nodes.Document;
 import org.example.work.parse.nodes.Element;
 import org.example.work.parse.nodes.Node;
 import org.example.work.parse.nodes.TextNode;
-import sun.security.util.ECUtil;
 
-import java.security.Key;
 import java.util.*;
 
 /**
@@ -55,7 +51,7 @@ public class ExtractFingerprint {
     public static byte[] constructFingerprint(int choice,byte[] origin_fingerprint){
         byte flag = (byte)(choice << 4);
         byte length;
-        System.out.println(origin_fingerprint.length);
+//        System.out.println("part fp size : " + origin_fingerprint.length);
         if (origin_fingerprint.length < 256) {
             length = (byte) (origin_fingerprint.length);
         } else {
@@ -233,7 +229,7 @@ public class ExtractFingerprint {
                     result[i++] = (byte) element.getTagName().hashCode();
             }
         }
-        System.out.println("i = " + i);
+//        System.out.println("i = " + i);
         return constructFingerprint(HTML_HEAD_TAG,new ByteArray(result,0,i).getBytes());
 
     }
@@ -320,7 +316,8 @@ public class ExtractFingerprint {
             }
         }
         // TODO 特征词提取
-        vector.addAll(Objects.requireNonNull(ExtractEigenWord.getBodyTreeEigenWord(html_body, leaf_nodes, max_parse_depth)));
+        List<EigenWord> words = ExtractEigenWord.getBodyTreeEigenWord(html_body, leaf_nodes, max_parse_depth);
+        if (words != null && words.size() != 0) vector.addAll(words);
         return constructFingerprint(HTML_BODY_TAG,new ByteArray(result,0,i).getBytes());
     }
 
