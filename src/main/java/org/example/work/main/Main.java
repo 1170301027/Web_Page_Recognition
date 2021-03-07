@@ -1,12 +1,5 @@
 package org.example.work.main;
 
-import org.example.auxiliary.FilePath;
-import org.example.kit.FileKit;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @Classname Main
  * @Description 主程序入口
@@ -16,6 +9,7 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        Cache cache = new Cache(12);
+        ThreadPool threadPool = new ThreadPool(12);
+        threadPool.run();
     }
 }

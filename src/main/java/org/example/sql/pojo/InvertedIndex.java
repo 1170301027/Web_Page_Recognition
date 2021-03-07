@@ -10,7 +10,7 @@ public class InvertedIndex implements Serializable {
 
     private static final long serialVersionUID = -1L;
 
-    private long word;
+    private long word; // 特征词
     private Integer pageId;
     private int index;
     private int frequency;

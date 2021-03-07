@@ -1,5 +1,7 @@
 package org.example.work.main;
 
+import org.example.auxiliary.FilePath;
+import org.example.kit.FileKit;
 import org.example.kit.entity.BiSupplier;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
@@ -13,9 +15,7 @@ import org.example.work.parse.nodes.Node;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.util.*;
 
 /**
@@ -28,6 +28,8 @@ public class MyThread extends Thread{
     private final int serial_number;
     private final String website;
     private Queue<String> urls;
+    private int threshold = 100; // 指定一个网站爬取网页的最大数量。
+    private int count = 0;
 
     public MyThread(int serial_number,String website) {
         this.serial_number = serial_number;
@@ -35,14 +37,35 @@ public class MyThread extends Thread{
         this.urls = new LinkedList<>();
     }
 
+    /**
+     * Crawl page and store to file (index.data)
+     * @param url
+     */
+    private void crawlPages(String url) {
+        try {
+            BiSupplier<URL,byte[]> response = Objects.requireNonNull(WebCrawl.getHttpPacketLoadedWithHTML(url));
+            FileKit.writePacket(url,response.second());
+            count++ ;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 单独处理一个URL：爬取+储存原始报文+解析+提取指纹特征
+     * @param url 网页 URL
+     */
     private void crawl(String url) {
+        if (url == null) return ;
         System.out.println(url);
         try {
             BiSupplier<URL,byte[]> response = Objects.requireNonNull(WebCrawl.getHttpPacketLoadedWithHTML(url));
+            FileKit.writePacket(url,response.second());
+            count++ ;
             byte[] data = response.second();
 
             ByteArray content_encoding = null;
-            if (WebCrawl.content_encoding != null) {
+            if (WebCrawl.content_encoding != null) { // 压缩格式，
                 content_encoding = WebCrawl.content_encoding;
             }
 
@@ -58,16 +81,18 @@ public class MyThread extends Thread{
             ByteArray responseBody = resp.subByteArray(spIndex + 4);
 
             Before before = new Before(responseBody, url, content_encoding);
-            extractFingerprintAndEigenWord(null,responseHeader,before);
+//            extractFingerprintAndEigenWord(null,responseHeader,before);
             for (String new_url : before.getParser().getUrls()) {
                 if (new_url.startsWith("/")) {
-                    new_url = "http://" + website + new_url;
+                    new_url = "https://" + website + new_url;
                 }
-                if (!urls.contains(new_url)) {
+                if (new_url.startsWith("http")) {
                     urls.offer(new_url);
                 }
             }
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
+            System.out.println("爬取返回结果为空");
+        } catch (URISyntaxException e) {
             e.printStackTrace();
         }
     }
@@ -126,13 +151,32 @@ public class MyThread extends Thread{
 
     @Override
     public void run() {
-        super.run();
-        String host_url = "http://" + this.website + "/";
+        String host_url = "https://" + this.website + "/";
         this.urls.offer(host_url);
-        while (this.urls != null) {
+        while (this.urls.size()!= 0 && count < 100) {
             String url = this.urls.poll();
+            long start = System.currentTimeMillis();
             crawl(url);
-
+            long end = System.currentTimeMillis();
+            System.out.println("count = " + count + ", timespan = " + (end - start) + ", website = " + website + ", url = " + url);
+            // ip -> host 记录
+            if (count == 1) {
+                try {
+                    URL current_url = new URL(host_url);
+                    String host = current_url.getHost();
+                    InetAddress address = InetAddress.getByName(host);
+                    String ip = address.getHostAddress();
+                    InetAddress[] IP = InetAddress.getAllByName(host);
+                    List<String> ipList = new ArrayList<>();
+                    for (InetAddress inetAddress : IP) {
+                        ipList.add(inetAddress.getHostAddress() + "," + host);
+                    }
+                    FileKit.writeAllLines(ipList, FilePath.ALL_IPS);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-     }
+        System.out.println("serial:" + serial_number + " is over.");
+    }
 }

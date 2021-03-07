@@ -29,6 +29,7 @@ public class WebCrawlTest {
         assert biSupplier != null;
         System.out.println(biSupplier.first());
         System.out.println(new String(biSupplier.second()));
+        FileKit.writePacket(url,biSupplier.second());
 
     }
 

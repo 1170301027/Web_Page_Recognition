@@ -77,7 +77,7 @@ public class Before {
      * 网页解析期间根据标签做出相应的动作
      */
     private void parseHTML(){
-        System.out.println("before : " + CONTENT_ENCODING.toStr());
+        System.out.println("before - content_encoding : " + CONTENT_ENCODING.toStr());
         handleContentEncoding(this.CONTENT_ENCODING);
         html_source.handleUnicodeIdentifier();
         parser = new Parser(html_source);
@@ -98,10 +98,11 @@ public class Before {
         document = parser.parse();
         max_parse_depth = parser.getMaxParsingDepth();
 
-        System.out.println("static resources : ");
-        System.out.println(resources.size());
-        System.out.println(forms.size());
-        System.out.println(hyper_links.size());
+        // 静态元素
+//        System.out.println("static resources : ");
+//        System.out.println(resources.size());
+//        System.out.println(forms.size());
+//        System.out.println(hyper_links.size());
     }
 
     /**

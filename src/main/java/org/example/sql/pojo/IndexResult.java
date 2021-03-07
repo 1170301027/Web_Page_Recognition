@@ -2,7 +2,7 @@ package org.example.sql.pojo;
 
 public class IndexResult implements Comparable<IndexResult> {
     private int pageId;
-    private int count;
+    private int count; // 特征词数量
 
     public int getPageId(){
         return pageId;

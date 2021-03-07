@@ -1,9 +1,11 @@
 package org.example;
 
+import net.sf.json.JSONObject;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.example.kit.FileKit;
 import org.example.sql.mapper.MatchMapper;
 import org.example.sql.pojo.Fingerprint;
 import org.junit.After;
@@ -14,6 +16,7 @@ import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * @Classname MyBatisTest
@@ -57,5 +60,11 @@ public class MyBatisTest {
         fingerprint.setFpdata(new byte[]{});
         fingerprint.setSimilarity(1.0);
         matchMapper.insertFingerprints(Collections.singletonList(fingerprint));
+    }
+
+    @Test
+    public void readDataAndInsert() {
+        List<JSONObject> jsonList = new ArrayList<>();
+        FileKit.readPacket(jsonList);
     }
 }

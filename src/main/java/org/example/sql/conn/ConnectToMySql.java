@@ -7,6 +7,7 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.example.sql.mapper.MatchMapper;
 import org.example.sql.pojo.Fingerprint;
 import org.example.sql.pojo.InvertedIndex;
+import org.example.sql.pojo.IptoHost;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +24,11 @@ public class ConnectToMySql {
     private InputStream in ;
     private SqlSessionFactory factory;
     private SqlSession session;
+
+    public MatchMapper getMatchMapper() {
+        return matchMapper;
+    }
+
     private MatchMapper matchMapper;
 
     public ConnectToMySql() {
@@ -70,6 +76,17 @@ public class ConnectToMySql {
             return ;
         }
         matchMapper.insertFeatureWords(words);
+    }
+
+    public void insertIptoHost(List<IptoHost> iptoHosts) {
+        if (iptoHosts == null || iptoHosts.size() == 0) {
+            return ;
+        }
+        matchMapper.insertIptoHost(iptoHosts);
+    }
+
+    public String findHostbyIp(String ip) {
+        return matchMapper.selectHostByIp(ip);
     }
 
 }
