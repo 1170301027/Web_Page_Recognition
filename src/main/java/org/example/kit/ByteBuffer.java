@@ -57,7 +57,10 @@ public class ByteBuffer {
     }
 
     private void indexOutOfBound(int index){
+//        System.out.println("this in ByteBuffer\n" + new String(this.buffer));
         throw new ArrayIndexOutOfBoundsException("index " + index + " is out of [" + offset + ", " + limit + ")");
+//        System.out.println("index " + index + " is out of [" + offset + ", " + limit + ")");
+
     }
 
     public byte get(int position){

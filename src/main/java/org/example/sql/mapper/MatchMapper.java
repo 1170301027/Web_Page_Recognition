@@ -19,7 +19,7 @@ public interface MatchMapper extends BaseMapper {
 
     void insertFeatureWords(@Param("list") List<InvertedIndex> fps);
 
-    void insertIptoHost(@Param("list") List<IptoHost> ips);
+    void insertIptoHost(IptoHost iptoHost);
 
     void insertPagetoUrl(@Param("list") List<PagetoUrl> pagetoUrls);
 }

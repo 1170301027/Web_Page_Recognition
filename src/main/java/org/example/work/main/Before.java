@@ -74,6 +74,10 @@ public class Before {
         this.sql = new ConnectToMySql();
     }
 
+    public String getUrl() {
+        return url;
+    }
+
     /**
      * 网页解析期间根据标签做出相应的动作
      */

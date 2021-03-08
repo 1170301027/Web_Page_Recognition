@@ -96,7 +96,7 @@ public class Parser {
                 if(!buffer.hasNext(TAG_START_FLAG))
                     break;
                 String name = getTagName();
-                if(name == null){
+                if(name == null || name.length() == 0){
                     break;
                 }else if(!name.equals("html")){ // <html 匹配，把非HTML节点的元素加到HTML节点的子节点中
                     if(name.charAt(0) == TAG_CLOSING_FLAG){

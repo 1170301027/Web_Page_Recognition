@@ -7,18 +7,17 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.example.auxiliary.FilePath;
 import org.example.kit.FileKit;
-import org.example.kit.entity.ByteArray;
-import org.example.kit.io.ByteBuilder;
 import org.example.sql.mapper.MatchMapper;
 import org.example.sql.pojo.Fingerprint;
+import org.example.sql.pojo.InvertedIndex;
+import org.example.sql.pojo.IptoHost;
+import org.example.sql.pojo.PagetoUrl;
 import org.example.work.main.MyThread;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.util.Assert;
 
 import java.io.InputStream;
-import java.net.URI;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,6 +68,24 @@ public class MyBatisTest {
     }
 
     @Test
+    public void insertEigenword() {
+        InvertedIndex eigenWord = new InvertedIndex();
+        eigenWord.setIndex(0);
+        eigenWord.setPageId(1);
+        eigenWord.setFrequency(10);
+        eigenWord.setWord(100000);
+        matchMapper.insertFeatureWords(Collections.singletonList(eigenWord));
+    }
+
+    @Test
+    public void insertPagetoUrl() {
+        PagetoUrl pagetoUrl = new PagetoUrl();
+        pagetoUrl.setPageId(0);
+        pagetoUrl.setUrl("http://sdfsdfsdf.sdfsdf/");
+        matchMapper.insertPagetoUrl(Collections.singletonList(pagetoUrl));
+    }
+
+    @Test
     public void readDataAndInsert() {
         List<JSONObject> jsonList = new ArrayList<>();
         String filePath = FilePath.ROOT_PATH + "index.data";
@@ -77,12 +94,25 @@ public class MyBatisTest {
         JSONObject jo = jsonList.get(0);
         String url = jo.getString("url");
         byte[] data = jo.getString("data").getBytes();
-        test.doParseAndExtract(url,data,110);
+        test.doParseAndExtract(url,data,0);
     }
 
     @Test
     public void buildFpAndWordsLib() {
         MyThread myThread = new MyThread();
         myThread.buildFpAndWordsLib();
+    }
+
+    @Test
+    public void buildIptoHostLib() {
+
+    }
+
+    @Test
+    public void insertIptoHost() {
+        IptoHost iptoHost = new IptoHost();
+        iptoHost.setIp("0.0.0.1");
+        iptoHost.setHost("www.shuai.com");
+        matchMapper.insertIptoHost(iptoHost);
     }
 }

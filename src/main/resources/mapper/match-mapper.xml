@@ -32,17 +32,15 @@
     </insert>
 
     <insert id="insertFeatureWords">
-        INSERT INTO inverted_index (page_id,word,index,frequency) VALUES
+        INSERT INTO inverted_index (page_id,word,frequency,word_index) VALUES
         <foreach collection="list" item="s" separator=",">
-            (#{s.pageId},#{s.word},#{s.index},#{s.frequency})
+            (#{s.pageId},#{s.word},#{s.frequency},#{s.index})
         </foreach>
     </insert>
 
-    <insert id="insertIptoHost">
+    <insert id="insertIptoHost" useGeneratedKeys="true" keyProperty="id" parameterType="IptoHost">
         INSERT INTO ip_host (ip,host) VALUES
-        <foreach collection="list" item="s" separator=",">
-            (#{s.ip},#{s.host})
-        </foreach>
+            (#{ip},#{host})
     </insert>
 
     <insert id="insertPagetoUrl">

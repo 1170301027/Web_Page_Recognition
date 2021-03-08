@@ -8,6 +8,7 @@ import org.example.sql.mapper.MatchMapper;
 import org.example.sql.pojo.Fingerprint;
 import org.example.sql.pojo.InvertedIndex;
 import org.example.sql.pojo.IptoHost;
+import org.example.sql.pojo.PagetoUrl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -87,9 +88,19 @@ public class ConnectToMySql {
         if (iptoHosts == null || iptoHosts.size() == 0) {
             return ;
         }
-        matchMapper.insertIptoHost(iptoHosts);
+        for (IptoHost iptoHost : iptoHosts)
+            matchMapper.insertIptoHost(iptoHost);
         commit();
     }
+
+    public void insertPagetoUrl(List<PagetoUrl> pagetoUrls) {
+        if (pagetoUrls == null || pagetoUrls.size() == 0) {
+            return ;
+        }
+        matchMapper.insertPagetoUrl(pagetoUrls);
+        commit();
+    }
+
 
     public String findHostbyIp(String ip) {
         return matchMapper.selectHostByIp(ip);

@@ -166,6 +166,9 @@ public class ExtractFingerprint {
         byte[] result = new byte[1024];
         int i = 0; // index索引
 //        System.out.println(html_head.childrenSize());
+        if (html_head == null) {
+            return new byte[0];
+        }
         for (Node node : html_head.children()) {
             if (!(node instanceof  Element)) {
                 continue;
@@ -244,7 +247,7 @@ public class ExtractFingerprint {
     public static byte[] handleHtmlBody(Element html_body, List<EigenWord> vector){
         if (html_body == null) {
             System.out.println("HTML Body is null");
-            return null;
+            return new byte[0];
         }
         byte[] result = new byte[4096];
         int i = 0;

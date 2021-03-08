@@ -10,6 +10,7 @@ import org.example.sql.conn.ConnectToMySql;
 import org.example.sql.mapper.MatchMapper;
 import org.example.sql.pojo.Fingerprint;
 import org.example.sql.pojo.InvertedIndex;
+import org.example.sql.pojo.PagetoUrl;
 import org.example.work.crawl.WebCrawl;
 import org.example.work.eigenword.EigenWord;
 import org.example.work.eigenword.ExtractEigenWord;
@@ -121,12 +122,13 @@ public class MyThread extends Thread{
         do {
             jsonList.clear();
             start_line = FileKit.readPacket(jsonList,filePath,start_line,threshold);
-            for (JSONObject jo : jsonList) {
+            for (int i = 4651; i < jsonList.size(); i++) {
+                JSONObject jo = jsonList.get(i);
                 String url = jo.getString("url");
                 byte[] data = jo.getString("data").getBytes();
                 doParseAndExtract(url,data,page_id++);
             }
-        } while (jsonList.size() < threshold);
+        } while (jsonList.size() >= threshold);
         FileKit.writeALineToFile(String.valueOf(page_id),FilePath.LAST_PAGE_ID);
     }
 
@@ -144,15 +146,17 @@ public class MyThread extends Thread{
      */
     public void doParseAndExtract(String url, byte[] data, int page_id) {
         System.out.println("URL : " + url);
-        String head = "HTTP/1.1 200 OK\r\n";
-        ByteBuilder builder = new ByteBuilder(data.length + head.length());
-        builder.write(head.getBytes());
+//        String head = "HTTP/1.1 200 OK\r\n";
+        ByteBuilder builder = new ByteBuilder(data.length); //+ head.length());
+//        builder.write(head.getBytes());
         builder.write(data);
         ByteArray resp = new ByteArray(builder.getBytes());
         int spIndex = resp.indexOf(new byte[]{'\r', '\n', '\r', '\n'});
         Assert.isTrue(spIndex >= 0, "错误的 HTTP 报文格式");
         ByteArray responseHeader = resp.subByteArray(0, spIndex);
         ByteArray responseBody = resp.subByteArray(spIndex + 4);
+
+//        System.out.println(new String(responseBody.getBytes()));
 
         ByteArray content_encoding = new ByteArray("gzip".getBytes());
         Before before = new Before(responseBody, url, content_encoding);
@@ -217,6 +221,11 @@ public class MyThread extends Thread{
         fp.setFpdata(fingerprint.getBytes());
         fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
         fp.setPageId(page_id);
+
+        PagetoUrl pagetoUrl = new PagetoUrl();
+        pagetoUrl.setPageId(page_id);
+        pagetoUrl.setUrl(before.getUrl());
+        conn.insertPagetoUrl(Collections.singletonList(pagetoUrl));
 
         conn.insertFingerprint(Collections.singletonList(fp));
         conn.insertEigenWord(words);
