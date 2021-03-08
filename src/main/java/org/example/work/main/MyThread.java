@@ -122,7 +122,7 @@ public class MyThread extends Thread{
         do {
             jsonList.clear();
             start_line = FileKit.readPacket(jsonList,filePath,start_line,threshold);
-            for (int i = 21977; i < jsonList.size(); i++) {
+            for (int i = 0; i < jsonList.size(); i++) {
                 JSONObject jo = jsonList.get(i);
                 String url = jo.getString("url");
                 byte[] data = jo.getString("data").getBytes();
