@@ -75,16 +75,16 @@ public class Parser {
 
     private void parseDOCTYPE(){
         // doctype解析
-        String doctype = "<!DOCTYPE html>";
-        byte[] temp = doctype.getBytes();
-        ByteArray byteArray = new ByteArray( buffer.array() );
-        byteArray.indexOf(temp);
-        if (!buffer.hasNext(TAG_START_FLAG)) return;
-        String name = getTagName();
-        assert name != null;
-        if (name.equals("DOCTYPE")) {
-            buffer.moveTo(TAG_END_FLAG);
-        }
+//        String doctype = "<!DOCTYPE html>";
+//        byte[] temp = doctype.getBytes();
+//        ByteArray byteArray = new ByteArray( buffer.array() );
+//        byteArray.indexOf(temp);
+//        if (!buffer.hasNext(TAG_START_FLAG)) return;
+//        String name = getTagName();
+//        assert name != null;
+//        if (name.equals("DOCTYPE")) {
+//            buffer.moveTo(TAG_END_FLAG);
+//        }
     }
 
     private Element parseHTML(){

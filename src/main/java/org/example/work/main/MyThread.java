@@ -114,21 +114,23 @@ public class MyThread extends Thread{
     public void buildFpAndWordsLib() {
         List<JSONObject> jsonList = new ArrayList<>(); // json列表
         String filePath = FilePath.ROOT_PATH + "index.data"; // 读取源文件
-        int start_line = 0;
-        int threshold = 75000 ; // 限定一次读入内存最大数据
-        String last_page = FileKit.readALineFromFile(FilePath.LAST_PAGE_ID);
-        int page_id = 0;
-        if (last_page != null)  page_id = Integer.parseInt(last_page);
-        do {
+        int start_line = Integer.parseInt(FileKit.readALineFromFile(FilePath.LAST_READ_LINE)); // 上一次读到行数
+        int threshold = 20000 ; // 限定一次读入内存最大数据
+        int page_id = Integer.parseInt(FileKit.readALineFromFile(FilePath.LAST_PAGE_ID));
+//        do {
             jsonList.clear();
+
             start_line = FileKit.readPacket(jsonList,filePath,start_line,threshold);
-            for (int i = 0; i < jsonList.size(); i++) {
+            for (int i = 17321; i < jsonList.size(); i++) {
                 JSONObject jo = jsonList.get(i);
                 String url = jo.getString("url");
+                if (url.contains("paxinasgalegas.es")) continue;
                 byte[] data = jo.getString("data").getBytes();
+                System.out.println(i);
                 doParseAndExtract(url,data,page_id++);
             }
-        } while (jsonList.size() >= threshold);
+            FileKit.writeALineToFile(start_line + "",FilePath.LAST_READ_LINE);
+//        } while (jsonList.size() >= threshold);
         FileKit.writeALineToFile(String.valueOf(page_id),FilePath.LAST_PAGE_ID);
     }
 

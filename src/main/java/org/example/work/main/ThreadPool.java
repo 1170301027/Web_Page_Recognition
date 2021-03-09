@@ -53,7 +53,7 @@ public class ThreadPool {
         doParse();
         System.out.println("完成读取website数据 :" + websites.size());
         int count = 0;
-        serial_number = 800000;// 12500
+        serial_number = 610855;// 12500
         while (serial_number < websites.size()) {
             while (count < threshold && serial_number < websites.size()) {
                 count++;
