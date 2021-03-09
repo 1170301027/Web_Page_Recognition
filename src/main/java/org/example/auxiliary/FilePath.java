@@ -14,4 +14,5 @@ public class FilePath {
     public static final String SOURCE_PATH = ROOT_PATH + "source\\";
     public static final String LAST_PAGE_ID = ROOT_PATH + "page_id.txt";
     public static final String LAST_READ_LINE = ROOT_PATH + "read_line_number.txt";
+    public static final String URL_LIST = ROOT_PATH + "url.txt";
 }

@@ -5,6 +5,7 @@ import org.example.sql.conn.ConnectToMySql;
 import org.example.sql.mapper.MatchMapper;
 import org.example.sql.pojo.Fingerprint;
 import org.example.sql.pojo.IndexResult;
+import org.example.sql.pojo.InvertedIndex;
 import org.example.work.eigenword.EigenWord;
 
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ public class Matcher {
             wordsTarget.add(eigenWord.getWord());
         }
         // 倒排索引，根据特征词获取出现该词的网页
-        filterByTargetWords(wordsTarget);
         // 查询完成后统计每个网页包含目标特征词的个数，并过滤掉次数在阈值(目标特征词个数的一半)及以下的网页
         List<IndexResult> candidate = matchMapper.getCandidateSetByWords(wordsTarget, wordsTarget.size() > 2 ? wordsTarget.size() / 2 : null);
 
@@ -43,6 +43,8 @@ public class Matcher {
             matchResult.setSuccess(false);
             return matchResult;
         }
+        // 过滤候选网页集。
+        filterByTargetWords(wordsTarget,candidate);
         // 网页候选集按特征词数量排序
         Collections.sort(candidate);
         List<Integer> pageIds = new ArrayList<>();
@@ -65,9 +67,12 @@ public class Matcher {
     /**
      * 根据目标特征词过滤网页候选集
      * @param wordsTarget -目标网页特征词列表
+     * @param candidate_page - 候选网页集
      */
-    private void filterByTargetWords(List<Long> wordsTarget) {
-        for (long word : wordsTarget){
+    private void filterByTargetWords(List<Long> wordsTarget, List<IndexResult> candidate_page) {
+        List<InvertedIndex> candidate_words = new ArrayList<>();
+        for (IndexResult indexResult : candidate_page) {
+
         }
     }
 

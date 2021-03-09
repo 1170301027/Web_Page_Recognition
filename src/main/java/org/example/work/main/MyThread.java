@@ -10,6 +10,7 @@ import org.example.sql.conn.ConnectToMySql;
 import org.example.sql.mapper.MatchMapper;
 import org.example.sql.pojo.Fingerprint;
 import org.example.sql.pojo.InvertedIndex;
+import org.example.sql.pojo.IptoHost;
 import org.example.sql.pojo.PagetoUrl;
 import org.example.work.crawl.WebCrawl;
 import org.example.work.eigenword.EigenWord;
@@ -113,32 +114,96 @@ public class MyThread extends Thread{
      */
     public void buildFpAndWordsLib() {
         List<JSONObject> jsonList = new ArrayList<>(); // json列表
-        String filePath = FilePath.ROOT_PATH + "index.data"; // 读取源文件
+        String filePath = FilePath.ROOT_PATH + "index2.data"; // 读取源文件
         int start_line = Integer.parseInt(FileKit.readALineFromFile(FilePath.LAST_READ_LINE)); // 上一次读到行数
         int threshold = 20000 ; // 限定一次读入内存最大数据
         int page_id = Integer.parseInt(FileKit.readALineFromFile(FilePath.LAST_PAGE_ID));
-//        do {
+        do {
             jsonList.clear();
-
             start_line = FileKit.readPacket(jsonList,filePath,start_line,threshold);
-            for (int i = 17321; i < jsonList.size(); i++) {
+            for (int i = 0; i < jsonList.size(); i++) {
                 JSONObject jo = jsonList.get(i);
                 String url = jo.getString("url");
-                if (url.contains("paxinasgalegas.es")) continue;
+                if (url.contains("10bestesingleboersen.de")) continue;
                 byte[] data = jo.getString("data").getBytes();
                 System.out.println(i);
+                System.out.println("start line : " + start_line);
                 doParseAndExtract(url,data,page_id++);
             }
             FileKit.writeALineToFile(start_line + "",FilePath.LAST_READ_LINE);
-//        } while (jsonList.size() >= threshold);
-        FileKit.writeALineToFile(String.valueOf(page_id),FilePath.LAST_PAGE_ID);
+            FileKit.writeALineToFile(String.valueOf(page_id),FilePath.LAST_PAGE_ID);
+        } while (jsonList.size() >= threshold);
+    }
+
+    public void crawl_new(String url, int page_id) {
+        if (url == null) return ;
+        System.out.println(url);
+        try {
+            BiSupplier<URL,byte[]> response = Objects.requireNonNull(WebCrawl.getHttpPacketLoadedWithHTML(url));
+            byte[] data = response.second(); //未解码的响应报文，头部已分配。
+//            System.out.println(new String(data));
+            ByteArray content_encoding = null;
+            if (WebCrawl.content_encoding != null) {
+                content_encoding = WebCrawl.content_encoding;
+            }
+//            System.out.println(new String(data));
+            String head = "HTTP/1.1 200 OK\r\n";
+            ByteBuilder builder = new ByteBuilder(data.length + head.length());
+            builder.write(head.getBytes());
+            builder.write(data);
+            ByteArray resp = new ByteArray(builder.getBytes());
+            URI uri = new URI(url);
+            int spIndex = resp.indexOf(new byte[]{'\r', '\n', '\r', '\n'});
+            Assert.isTrue(spIndex >= 0, "错误的 HTTP 报文格式");
+            ByteArray responseHeader = resp.subByteArray(0, spIndex);
+            ByteArray responseBody = resp.subByteArray(spIndex + 4);
+            System.out.println(content_encoding.toStr());
+            Before before = new Before(responseBody,url,content_encoding);
+            Document document = before.getDocument();
+            extractFingerprintAndEigenWord(null,responseHeader,before,page_id);
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void buildFpAndWordsLib_new() {
+        List<JSONObject> jsonList = new ArrayList<>(); // json列表
+        String filePath = FilePath.ROOT_PATH + "index-finish.data"; // 读取源文件
+        int start_line = Integer.parseInt(FileKit.readALineFromFile(FilePath.LAST_READ_LINE)); // 上一次读到行数
+        int threshold = 20000 ; // 限定一次读入内存最大数据
+        int page_id = Integer.parseInt(FileKit.readALineFromFile(FilePath.LAST_PAGE_ID));
+        do {
+            jsonList.clear();
+            start_line = FileKit.readPacket(jsonList,filePath,start_line,threshold);
+            for (int i = 0; i < jsonList.size(); i++) {
+                JSONObject jo = jsonList.get(i);
+                String url = jo.getString("url");
+                try {
+                    FileKit.writeAllLines(Collections.singletonList(url), FilePath.URL_LIST);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                crawl_new(url,page_id++);
+            }
+            FileKit.writeALineToFile(start_line + "",FilePath.LAST_READ_LINE);
+            FileKit.writeALineToFile(String.valueOf(page_id),FilePath.LAST_PAGE_ID);
+        } while (jsonList.size() >= threshold);
     }
 
     /**
      * 从文件中读取DNS相关信息并建立IP——HOST库
      */
-    private void buildIpAndHostLib() {
-
+    public void buildIpAndHostLib() {
+        try {
+            for (String line : FileKit.getAllLines(FilePath.ALL_IPS)) {
+                IptoHost iptoHost = new IptoHost();
+                iptoHost.setIp(line.split(",")[0]);
+                iptoHost.setHost(line.split(",")[1]);
+                conn.getMatchMapper().insertIptoHost(iptoHost);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -148,19 +213,19 @@ public class MyThread extends Thread{
      */
     public void doParseAndExtract(String url, byte[] data, int page_id) {
         System.out.println("URL : " + url);
-//        String head = "HTTP/1.1 200 OK\r\n";
-        ByteBuilder builder = new ByteBuilder(data.length); //+ head.length());
-//        builder.write(head.getBytes());
+        String head = "HTTP/1.1 200 OK\r\n";
+        ByteBuilder builder = new ByteBuilder(data.length + head.length());
+        builder.write(head.getBytes());
         builder.write(data);
         ByteArray resp = new ByteArray(builder.getBytes());
         int spIndex = resp.indexOf(new byte[]{'\r', '\n', '\r', '\n'});
         Assert.isTrue(spIndex >= 0, "错误的 HTTP 报文格式");
         ByteArray responseHeader = resp.subByteArray(0, spIndex);
         ByteArray responseBody = resp.subByteArray(spIndex + 4);
+        ByteArray content_encoding = new ByteArray("gzip".getBytes());
 
 //        System.out.println(new String(responseBody.getBytes()));
 
-        ByteArray content_encoding = new ByteArray("gzip".getBytes());
         Before before = new Before(responseBody, url, content_encoding);
         extractFingerprintAndEigenWord(null,responseHeader,before,page_id);
     }

@@ -8,15 +8,13 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.example.auxiliary.FilePath;
 import org.example.kit.FileKit;
 import org.example.sql.mapper.MatchMapper;
-import org.example.sql.pojo.Fingerprint;
-import org.example.sql.pojo.InvertedIndex;
-import org.example.sql.pojo.IptoHost;
-import org.example.sql.pojo.PagetoUrl;
+import org.example.sql.pojo.*;
 import org.example.work.main.MyThread;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -86,6 +84,25 @@ public class MyBatisTest {
     }
 
     @Test
+    public void getCandidateword() {
+        int threshold = 5;
+//        long long word = 2377900603251621120;
+//        long[] words = { 2377900603251621120, 2377900603251620352,
+//                6989586621670960384,
+//                2377900603251613696,
+//                2377900603251034368,
+//                6989586621670960384,
+//                2377900603248680704,
+//                2377900603244552960,
+//                2377900603244681216,
+//                2377900601393890560,
+//                6989586621670960384};
+        List<Long> wordsTarget = new ArrayList<>();
+//        wordsTarget.add()
+        List<IndexResult> candidate = matchMapper.getCandidateSetByWords(wordsTarget, wordsTarget.size() > 2 ? wordsTarget.size() / 2 : null);
+    }
+
+    @Test
     public void readDataAndInsert() {
         List<JSONObject> jsonList = new ArrayList<>();
         String filePath = FilePath.ROOT_PATH + "index.data";
@@ -104,8 +121,16 @@ public class MyBatisTest {
     }
 
     @Test
-    public void buildIptoHostLib() {
+    public void buildFpAndWordsLib_new() {
+        MyThread myThread = new MyThread();
+        myThread.buildFpAndWordsLib_new();
+    }
 
+
+    @Test
+    public void buildIptoHostLib() {
+        MyThread myThread = new MyThread();
+        myThread.buildIpAndHostLib();
     }
 
     @Test
@@ -114,5 +139,11 @@ public class MyBatisTest {
         iptoHost.setIp("0.0.0.1");
         iptoHost.setHost("www.shuai.com");
         matchMapper.insertIptoHost(iptoHost);
+    }
+
+    @Test
+    public void findHostByIp() {
+        String ip = "0.0.0.1";
+        System.out.println(matchMapper.selectHostByIp(ip));
     }
 }

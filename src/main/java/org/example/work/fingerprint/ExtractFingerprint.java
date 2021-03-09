@@ -166,9 +166,9 @@ public class ExtractFingerprint {
         byte[] result = new byte[1024];
         int i = 0; // index索引
 //        System.out.println(html_head.childrenSize());
-        if (html_head == null) {
-            return new byte[0];
-        }
+//        if (html_head == null) {
+//            return new byte[0];
+//        }
         for (Node node : html_head.children()) {
             if (!(node instanceof  Element)) {
                 continue;
@@ -178,6 +178,7 @@ public class ExtractFingerprint {
 //            System.out.println(tag.getName());
             switch (tag.getName()) {
                 case "meta":
+
                     // 元数据通常以名称/值存在,如果没有name属性值，那么键值对可能以http-equiv的形式存在
                     ByteArray key = element.attr("name");
                     if (key == null) {

@@ -181,6 +181,9 @@ public class ExtractEigenWord {
     public static byte[] removeHostFromURL(byte[] url) {
         String URL = new String(url);
         StringBuilder result = new StringBuilder();
+        if (URL.startsWith("/")) {
+            return url;
+        }
         if (URL.contains("http")) {
             String[] splits = URL.split("//");
             splits = splits[1].split("/");
@@ -272,6 +275,7 @@ public class ExtractEigenWord {
             long hash = hashTo60Bits(removeHostFromURL(action.getBytes()));
             for (Node input : inputs) {
                 Element element = (Element) input;
+                if (element.attr("type") == null || element.attr("name") == null) continue;
                 word = word * 31 + hashTo60Bits(element.attr("type").getBytes());
                 word = word * 31 + hashTo60Bits(element.attr("name").getBytes());
             }

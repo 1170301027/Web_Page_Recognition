@@ -313,7 +313,7 @@ public class Parser {
         while((v = buffer.get()) == '!' || v == '?'){ // TODO 注释的解析，getTagName方法优化
             if(buffer.getNext() == '-')
                 buffer.moveTo(COMMENT_END_FLAG);
-            buffer.moveTo(TAG_END_FLAG); // <!--注释--> ?
+            buffer.moveTo(TAG_END_FLAG); // <!DOCTYPE>
             if(buffer.noNext(TAG_START_FLAG)) //没有下一个标签
                 return null;
         }

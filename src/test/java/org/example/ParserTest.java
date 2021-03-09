@@ -45,6 +45,7 @@ public class ParserTest {
         try {
             BiSupplier<URL,byte[]> response = Objects.requireNonNull(WebCrawl.getHttpPacketLoadedWithHTML(url_news));
             byte[] data = response.second(); //未解码的响应报文，头部已分配。
+            System.out.println(new String(data));
             ByteArray content_encoding = null;
             if (WebCrawl.content_encoding != null) {
                 content_encoding = WebCrawl.content_encoding;
@@ -74,10 +75,11 @@ public class ParserTest {
     @Test
     public void test_extract_fingerprint_and_eigenword() {
         String url = "http://" + host;
-        String url_news = "http://today.hit.edu.cn/article/2019/02/28/64283";
+        String url_news = "https://www.thepeoplesprojects.org.uk/projects/region/wales";
         try {
             BiSupplier<URL,byte[]> response = Objects.requireNonNull(WebCrawl.getHttpPacketLoadedWithHTML(url_news));
             byte[] data = response.second(); //未解码的响应报文，头部已分配。
+//            System.out.println(new String(data));
             ByteArray content_encoding = null;
             if (WebCrawl.content_encoding != null) {
                 content_encoding = WebCrawl.content_encoding;
@@ -93,12 +95,9 @@ public class ParserTest {
             Assert.isTrue(spIndex >= 0, "错误的 HTTP 报文格式");
             ByteArray responseHeader = resp.subByteArray(0, spIndex);
             ByteArray responseBody = resp.subByteArray(spIndex + 4);
+            System.out.println(content_encoding.toStr());
             Before before = new Before(responseBody,url_news,content_encoding);
             Document document = before.getDocument();
-            System.out.println("hyper links : ");
-            for (String s : before.getParser().getUrls()) {
-                System.out.println(s);
-            }
             new MyThread(0,null).extractFingerprintAndEigenWord(null,responseHeader,before,0);
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
