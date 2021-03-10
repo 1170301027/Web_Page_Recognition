@@ -1,5 +1,8 @@
 package org.example;
 
+import net.sf.json.JSONObject;
+import org.example.auxiliary.FilePath;
+import org.example.kit.FileKit;
 import org.example.kit.entity.BiSupplier;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
@@ -16,6 +19,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -75,11 +81,54 @@ public class ParserTest {
     @Test
     public void test_extract_fingerprint_and_eigenword() {
         String url = "http://" + host;
-        String url_news = "https://www.thepeoplesprojects.org.uk/projects/region/wales";
+        String url_news = "https://torfhaus-harzresort.de/";
         try {
             BiSupplier<URL,byte[]> response = Objects.requireNonNull(WebCrawl.getHttpPacketLoadedWithHTML(url_news));
             byte[] data = response.second(); //未解码的响应报文，头部已分配。
+            System.out.println(new String(data));
+            System.out.println(data.length);
+            ByteArray content_encoding = null;
+            if (WebCrawl.content_encoding != null) {
+                content_encoding = WebCrawl.content_encoding;
+            }
 //            System.out.println(new String(data));
+            String head = "HTTP/1.1 200 OK\r\n";
+            ByteBuilder builder = new ByteBuilder(data.length + head.length());
+            builder.write(head.getBytes());
+            builder.write(data);
+            ByteArray resp = new ByteArray(builder.getBytes());
+            URI uri = new URI(url_news);
+            int spIndex = resp.indexOf(new byte[]{'\r', '\n', '\r', '\n'});
+            Assert.isTrue(spIndex >= 0, "错误的 HTTP 报文格式");
+            ByteArray responseHeader = resp.subByteArray(0, spIndex);
+            ByteArray responseBody = resp.subByteArray(spIndex + 4);
+            System.out.println(content_encoding.toStr());
+            Before before = new Before(responseBody,url_news,content_encoding);
+            Document document = before.getDocument();
+            new MyThread(0,null).extractFingerprintAndEigenWord(null,responseHeader,before,0);
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void new_test() {
+        List<JSONObject> jsonList = new ArrayList<>();
+        String filePath = FilePath.ROOT_PATH + "index2.data";
+        FileKit.readPacket(jsonList,filePath,0,1);
+        MyThread test = new MyThread();
+        JSONObject jo = jsonList.get(0);
+        String url = jo.getString("url");
+        byte[] _data = new byte[0];
+        _data = jo.getString("data").getBytes();
+        System.out.println(jo.getString("data"));
+        String url_news = "https://torfhaus-harzresort.de/";
+        try {
+            BiSupplier<URL,byte[]> response = Objects.requireNonNull(WebCrawl.getHttpPacketLoadedWithHTML(url_news));
+            byte[] data = response.second(); //未解码的响应报文，头部已分配。
+            System.out.println(new String(data));
+            System.out.println(data.length);
+            System.out.println(Arrays.equals(data, _data));
             ByteArray content_encoding = null;
             if (WebCrawl.content_encoding != null) {
                 content_encoding = WebCrawl.content_encoding;

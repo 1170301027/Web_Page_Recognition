@@ -83,7 +83,7 @@ public class Before {
      */
     private void parseHTML(){
 //        System.out.println("before - content_encoding : " + CONTENT_ENCODING.toStr());
-        handleContentEncoding(this.CONTENT_ENCODING);
+        if (this.CONTENT_ENCODING != null) handleContentEncoding(this.CONTENT_ENCODING);
         html_source.handleUnicodeIdentifier();
         parser = new Parser(html_source);
 

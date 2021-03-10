@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -105,12 +106,15 @@ public class MyBatisTest {
     @Test
     public void readDataAndInsert() {
         List<JSONObject> jsonList = new ArrayList<>();
-        String filePath = FilePath.ROOT_PATH + "index.data";
+        String filePath = FilePath.ROOT_PATH + "index2.data";
         FileKit.readPacket(jsonList,filePath,0,1);
         MyThread test = new MyThread();
         JSONObject jo = jsonList.get(0);
         String url = jo.getString("url");
-        byte[] data = jo.getString("data").getBytes();
+        byte[] data = new byte[0];
+        data = jo.getString("data").getBytes();
+        System.out.println(jo.getString("data"));
+        System.out.println(data.length);
         test.doParseAndExtract(url,data,0);
     }
 

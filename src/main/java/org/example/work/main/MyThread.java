@@ -36,31 +36,18 @@ public class MyThread extends Thread{
     private Queue<String> urls;
     private int threshold = 100; // 指定一个网站爬取网页的最大数量。
     private int count = 0;
-    private ConnectToMySql conn;
+    private static ConnectToMySql conn = new ConnectToMySql();
+
+    public static int page_id = 50417;
 
     public MyThread() {
         this.serial_number = 0;
         this.website = "0.0";
-        this.conn = new ConnectToMySql();
     }
     public MyThread(int serial_number,String website) {
         this.serial_number = serial_number;
         this.website = website;
         this.urls = new LinkedList<>();
-    }
-
-    /**
-     * Crawl page and store to file (index.data)
-     * @param url
-     */
-    private void crawlPages(String url) {
-        try {
-            BiSupplier<URL,byte[]> response = Objects.requireNonNull(WebCrawl.getHttpPacketLoadedWithHTML(url));
-            FileKit.writePacket(url,response.second());
-            count++ ;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -152,16 +139,14 @@ public class MyThread extends Thread{
             builder.write(head.getBytes());
             builder.write(data);
             ByteArray resp = new ByteArray(builder.getBytes());
-            URI uri = new URI(url);
             int spIndex = resp.indexOf(new byte[]{'\r', '\n', '\r', '\n'});
             Assert.isTrue(spIndex >= 0, "错误的 HTTP 报文格式");
             ByteArray responseHeader = resp.subByteArray(0, spIndex);
             ByteArray responseBody = resp.subByteArray(spIndex + 4);
-            System.out.println(content_encoding.toStr());
+//            System.out.println(content_encoding.toStr());
             Before before = new Before(responseBody,url,content_encoding);
-            Document document = before.getDocument();
             extractFingerprintAndEigenWord(null,responseHeader,before,page_id);
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -237,7 +222,7 @@ public class MyThread extends Thread{
      * @param responseHeader 响应头部
      * @param before 网页预处理结果
      */
-    public void extractFingerprintAndEigenWord(ByteArray requestHeader, ByteArray responseHeader, Before before , int page_id) {
+    public void extractFingerprintAndEigenWord(ByteArray requestHeader, ByteArray responseHeader, Before before , int page_ID) {
         Document document = before.getDocument();
         ByteBuilder fingerprint;
         List<EigenWord> vector = new ArrayList<>();
@@ -274,63 +259,79 @@ public class MyThread extends Thread{
         System.out.println();
         System.out.println("words size : " + vector.size());
         List<InvertedIndex> words = new ArrayList<>();
-        for (EigenWord eigenWord : vector) {
+        synchronized (this) {
+            for (EigenWord eigenWord : vector) {
 //            System.out.printf(" %x , %d\n",eigenWord.getWord(), eigenWord.getFrequency());
-            InvertedIndex invertedIndex = new InvertedIndex();
-            invertedIndex.setPageId(page_id);
-            invertedIndex.setWord(eigenWord.getWord());
-            invertedIndex.setFrequency(eigenWord.getFrequency());
-            invertedIndex.setIndex(eigenWord.getIndex());
-            words.add(invertedIndex);
+                InvertedIndex invertedIndex = new InvertedIndex();
+                invertedIndex.setPageId(page_id);
+                invertedIndex.setWord(eigenWord.getWord());
+                invertedIndex.setFrequency(eigenWord.getFrequency());
+                invertedIndex.setIndex(eigenWord.getIndex());
+                words.add(invertedIndex);
+            }
+
+            Fingerprint fp = new Fingerprint();
+            fp.setFpdata(fingerprint.getBytes());
+            fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
+            fp.setPageId(page_id);
+
+            PagetoUrl pagetoUrl = new PagetoUrl();
+            pagetoUrl.setPageId(page_id);
+            pagetoUrl.setUrl(before.getUrl());
+            page_id++;
+            insertDatabase(pagetoUrl,fp,words);
         }
-
-        Fingerprint fp =  new Fingerprint();
-        fp.setFpdata(fingerprint.getBytes());
-        fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
-        fp.setPageId(page_id);
-
-        PagetoUrl pagetoUrl = new PagetoUrl();
-        pagetoUrl.setPageId(page_id);
-        pagetoUrl.setUrl(before.getUrl());
-        conn.insertPagetoUrl(Collections.singletonList(pagetoUrl));
-
-        conn.insertFingerprint(Collections.singletonList(fp));
-        conn.insertEigenWord(words);
-
 
 //        fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
 //
 //        fp.setFpdata(fingerprint.getBytes());
     }
 
+    synchronized private void insertDatabase(PagetoUrl pagetoUrl, Fingerprint fp, List<InvertedIndex> words) {
+        synchronized (conn) {
+            conn.insertPagetoUrl(Collections.singletonList(pagetoUrl));
+
+            conn.insertFingerprint(Collections.singletonList(fp));
+            conn.insertEigenWord(words);
+        }
+    }
+
+
     @Override
     public void run() {
         String host_url = "https://" + this.website + "/";
         this.urls.offer(host_url);
-        while (this.urls.size()!= 0 && count < 100) {
-            String url = this.urls.poll();
+        String url = this.urls.poll();
+        while (this.urls.size()!= 0 && count < 10) {
             long start = System.currentTimeMillis();
-            crawl(url);
+            crawl_new(url, serial_number + 500);
             long end = System.currentTimeMillis();
             System.out.println("count = " + count + ", timespan = " + (end - start) + ", website = " + website + ", url = " + url);
-            // ip -> host 记录
-            if (count == 1) {
-                try {
-                    URL current_url = new URL(host_url);
-                    String host = current_url.getHost();
-                    InetAddress address = InetAddress.getByName(host);
-                    String ip = address.getHostAddress();
-                    InetAddress[] IP = InetAddress.getAllByName(host);
-                    List<String> ipList = new ArrayList<>();
-                    for (InetAddress inetAddress : IP) {
-                        ipList.add(inetAddress.getHostAddress() + "," + host);
-                    }
-                    FileKit.writeAllLines(ipList, FilePath.ALL_IPS);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
+//        while (this.urls.size()!= 0 && count < 100) {
+//            String url = this.urls.poll();
+//            long start = System.currentTimeMillis();
+//            crawl(url);
+//            long end = System.currentTimeMillis();
+//            System.out.println("count = " + count + ", timespan = " + (end - start) + ", website = " + website + ", url = " + url);
+//            // ip -> host 记录
+//            if (count == 1) {
+//                try {
+//                    URL current_url = new URL(host_url);
+//                    String host = current_url.getHost();
+//                    InetAddress address = InetAddress.getByName(host);
+//                    String ip = address.getHostAddress();
+//                    InetAddress[] IP = InetAddress.getAllByName(host);
+//                    List<String> ipList = new ArrayList<>();
+//                    for (InetAddress inetAddress : IP) {
+//                        ipList.add(inetAddress.getHostAddress() + "," + host);
+//                    }
+//                    FileKit.writeAllLines(ipList, FilePath.ALL_IPS);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
         System.out.println("serial:" + serial_number + " is over.");
     }
 }

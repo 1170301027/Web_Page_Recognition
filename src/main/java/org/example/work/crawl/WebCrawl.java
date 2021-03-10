@@ -88,7 +88,7 @@ public class WebCrawl {
                 String type = conn.getHeaderField("Content-Type");
                 if(type == null || !type.contains("text/html"))
                     return null;
-                content_encoding = new ByteArray(conn.getContentEncoding().getBytes());
+                if (conn.getContentEncoding() != null) content_encoding = new ByteArray(conn.getContentEncoding().getBytes());
                 ByteArrayOutputStream baos = new ByteArrayOutputStream(20 * 1024);
                 for(String header : headers){ //头部数据写入
                     baos.write(header.getBytes());

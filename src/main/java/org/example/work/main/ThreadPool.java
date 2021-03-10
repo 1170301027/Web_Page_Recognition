@@ -44,12 +44,39 @@ public class ThreadPool {
     }
 
 
-    public void run2() {
-        cache = Executors.newFixedThreadPool(this.threshold);
-
+    public void run() {
+        doParse();
+        System.out.println("完成读取website数据 :" + websites.size());
+        int count = 0;
+        serial_number = 50000;// 12500
+        while (serial_number < websites.size()) {
+            while (count < threshold && serial_number < websites.size()) {
+                count++;
+                System.out.println("当前count : " + count  + ", 创建新线程 ： " + serial_number);
+                MyThread newThread = new MyThread(serial_number, websites.get(serial_number));
+                this.threads.add(newThread);
+                newThread.start();
+                serial_number++;
+            }
+            try {
+                Thread.sleep(2*1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            //检查活性
+            for (MyThread thread : threads) {
+                if (!thread.isAlive()) {
+                    count--;
+                    threads.remove(thread);
+                }
+            }
+            if (serial_number > 800000) {
+                break;
+            }
+        }
     }
 
-    public void run() {
+    public void run2() {
         doParse();
         System.out.println("完成读取website数据 :" + websites.size());
         int count = 0;
