@@ -1,5 +1,6 @@
 package org.example.work.match;
 
+import org.aspectj.weaver.loadtime.Aj;
 import org.example.kit.entity.ByteArray;
 import org.example.sql.conn.ConnectToMySql;
 import org.example.sql.mapper.MatchMapper;
@@ -7,10 +8,9 @@ import org.example.sql.pojo.Fingerprint;
 import org.example.sql.pojo.IndexResult;
 import org.example.sql.pojo.InvertedIndex;
 import org.example.work.eigenword.EigenWord;
+import sun.security.krb5.internal.PAEncTSEnc;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Classname Matcher
@@ -45,6 +45,7 @@ public class Matcher {
         }
         // 过滤候选网页集。
         filterByTargetWords(wordsTarget,candidate);
+        filterByFeatureVector(Arrays.asList(identifiedPage.getEigenWords()),candidate);
         // 网页候选集按特征词数量排序
         Collections.sort(candidate);
         List<Integer> pageIds = new ArrayList<>();
@@ -65,15 +66,84 @@ public class Matcher {
     }
 
     /**
-     * 根据目标特征词过滤网页候选集
-     * @param wordsTarget -目标网页特征词列表
+     * （一轮过滤）根据目标特征词过滤网页候选集：根据网页候选集中目标特征词排序过滤掉明显不符合的网页
+     * @param words_target -目标网页特征词列表
      * @param candidate_page - 候选网页集
      */
-    private void filterByTargetWords(List<Long> wordsTarget, List<IndexResult> candidate_page) {
-        List<InvertedIndex> candidate_words = new ArrayList<>();
+    private void filterByTargetWords(List<Long> words_target, List<IndexResult> candidate_page) {
+        List<List<InvertedIndex>> candidate_words = new ArrayList<>();
         for (IndexResult indexResult : candidate_page) {
-
+            int page_id = indexResult.getPageId();
+            List<InvertedIndex> words = conn.getMatchMapper().selectFeatureWordsByPageID(page_id);
+            // sort by target_word
+            List<InvertedIndex> result_words = new ArrayList<>();
+            for (Long target_word : words_target) {
+                for (InvertedIndex candidate_word : words) {
+                    if (candidate_word.getWord() == target_word) {
+                        result_words.add(candidate_word);
+                        break;
+                    }
+                }
+            }
+            // sort by index
+            Collections.sort(result_words);
+            candidate_words.add(result_words);
         }
+        // 对每一组网页的特征向量和目标网页的特征向量进行相似度匹配。
+        for (int i = 0; i < candidate_words.size(); i++) {
+            int count = 0, maxEnd = 0; // 以POS j,a 结尾的最长公共子序列
+            for () {
+                // 二分查找maxEnd中第一个大于POS j,a 的元素，记录二分区间【left,right】
+
+            }
+            // 限定阈值，排除明显不符合的网页，
+            if (count < (3 * count) / 4)
+                candidate_page.remove(i);
+        }
+    }
+
+    /**
+     * （二轮过滤） 以词频做向量建立网页特征向量,计算网页候选集和 目标网页的特征向量之间的余弦相似度，选出相似度最大的网页，
+     * @param target_words-目标网页特征向量。
+     * @param candidate_page -网页候选集
+     */
+    private void filterByFeatureVector(List<EigenWord> target_words,List<IndexResult> candidate_page) {
+        List<List<Integer>> candidate_vectors = new ArrayList<>();
+        List<Integer> target_vector = new ArrayList<>();
+        for (EigenWord target_word : target_words) {
+
+            target_vector.add(target_word.getFrequency());
+        }
+        // 提取网页候选集的特征向量，
+        for (IndexResult indexResult : candidate_page) {
+            int page_id = indexResult.getPageId();
+            List<InvertedIndex> words = conn.getMatchMapper().selectFeatureWordsByPageID(page_id);
+            // sort by index
+            Collections.sort(words);
+            List<Integer> source_vector = new ArrayList<>();
+            for (InvertedIndex word : words) {
+                source_vector.add(word.getFrequency());
+            }
+            candidate_vectors.add(source_vector);
+        }
+        List<Double> page_sims = new ArrayList<>(); // 记录向量相似度值
+        double max_sim = 0.0;
+        // 特征向量相似度比较
+        for (List<Integer> candidate_vector : candidate_vectors) {
+            double sim = sim(candidate_vector,target_vector);
+            if (max_sim < sim) max_sim = sim;
+            page_sims.add(sim);
+        }
+        // 保留相似度最大的选项
+        for (int i = 0; i < page_sims.size(); i++) {
+            if (page_sims.get(i) < max_sim) {
+                candidate_page.remove(i);
+            }
+        }
+    }
+
+    private double sim(List<Integer> source, List<Integer> target) {
+
     }
 
     /**
@@ -135,5 +205,6 @@ public class Matcher {
             fp.setSimilarity(sim);
         }
         Collections.sort(fps);
+        Collections.reverse(fps);
     }
 }

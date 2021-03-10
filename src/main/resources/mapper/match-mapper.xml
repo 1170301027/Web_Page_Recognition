@@ -12,6 +12,10 @@
         <if test="threshold != null">) t where `count` > #{threshold}</if>
     </select>
 
+    <select id="selectFeatureWordsByPageID" parameterType="int" resultType="InvertedIndex" useCache="false" flushCache="true">
+        select * from inverted_index where page_id = #{page_id}
+    </select>
+
     <select id="selectFingerprintsByPageIds" resultType="Fingerprint" useCache="false" flushCache="true">
         select page_id,fpdata from fingerprint where page_id in (<foreach collection="list" item="s" separator=",">#{s}</foreach>)
     </select>

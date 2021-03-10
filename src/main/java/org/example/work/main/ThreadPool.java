@@ -117,15 +117,15 @@ public class ThreadPool {
         List<String> urls = doParse(FilePath.URL_LIST);
         System.out.println("完成读取url数据 :" + urls.size());
         int count = 0;
-        serial_number = 508;// 12500
+        serial_number = 13300;// 12500
         while (serial_number < urls.size()) {
             while (count < threshold && serial_number < urls.size()) {
                 count++;
-                serial_number++;
                 System.out.println("当前count : " + count  + ", 创建新线程 ： " + serial_number);
                 NewThread newThread = new NewThread(urls.get(serial_number), serial_number);
                 this.threads.add(newThread);
                 newThread.start();
+                serial_number++;
             }
             try {
                 Thread.sleep(2*1000);

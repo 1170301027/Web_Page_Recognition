@@ -69,8 +69,8 @@ public class MyBatisTest {
     @Test
     public void insertEigenword() {
         InvertedIndex eigenWord = new InvertedIndex();
-        eigenWord.setIndex(0);
-        eigenWord.setPageId(1);
+        eigenWord.setIndex(55);
+        eigenWord.setPageId(0);
         eigenWord.setFrequency(10);
         eigenWord.setWord(100000);
         matchMapper.insertFeatureWords(Collections.singletonList(eigenWord));
@@ -156,5 +156,13 @@ public class MyBatisTest {
     public void findHostByIp() {
         String ip = "0.0.0.1";
         System.out.println(matchMapper.selectHostByIp(ip));
+    }
+
+    @Test
+    public void selectFeatureWordsbyPageIDTest() {
+        List<InvertedIndex> result = matchMapper.selectFeatureWordsByPageID(13);
+        for (InvertedIndex invertedIndex : result) {
+            System.out.println(invertedIndex.toString());
+        }
     }
 }
