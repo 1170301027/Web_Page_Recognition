@@ -13,7 +13,13 @@ public class Main {
         threadPool.run();
     }
 
+    public static void doCrawl_1() {
+        ThreadPool threadPool = new ThreadPool(12);
+        threadPool.run_crawl_url_list();
+    }
+
     public static void main(String[] args) {
-        doCrawl();
+//        doCrawl();
+        doCrawl_1();
     }
 }

@@ -193,7 +193,8 @@ public class ExtractFingerprint {
                         ByteArray content = element.attr("content");
                         int id = getIDKey(key.toStr());
                         result[i++] = (byte) (id == -1 ? (byteHash(key) | 0x80) : id);
-                        result[i++] = hashTo1Byte(content.toStr());
+//                        if (content != null)  // change
+//                            result[i++] = hashTo1Byte(content.toStr());
                     }
                 case "link":
                     ByteArray rel = element.attr("rel");

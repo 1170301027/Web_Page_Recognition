@@ -130,6 +130,13 @@ public class MyBatisTest {
         myThread.buildFpAndWordsLib_new();
     }
 
+    @Test
+    public void storeURL() {
+        String filePath = FilePath.ROOT_PATH + "index3.data"; // 读取源文件
+        int start_line = 0; // 上一次读到行数
+        FileKit.readPacket2(filePath,start_line);
+    }
+
 
     @Test
     public void buildIptoHostLib() {

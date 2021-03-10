@@ -38,7 +38,7 @@ public class MyThread extends Thread{
     private int count = 0;
     private static ConnectToMySql conn = new ConnectToMySql();
 
-    public static int page_id = 50417;
+//    public static int page_id = 50417;
 
     public MyThread() {
         this.serial_number = 0;
@@ -126,7 +126,8 @@ public class MyThread extends Thread{
         if (url == null) return ;
         System.out.println(url);
         try {
-            BiSupplier<URL,byte[]> response = Objects.requireNonNull(WebCrawl.getHttpPacketLoadedWithHTML(url));
+            BiSupplier<URL,byte[]> response = WebCrawl.getHttpPacketLoadedWithHTML(url);
+            if (response == null) return ;
             byte[] data = response.second(); //未解码的响应报文，头部已分配。
 //            System.out.println(new String(data));
             ByteArray content_encoding = null;
@@ -160,7 +161,7 @@ public class MyThread extends Thread{
         do {
             jsonList.clear();
             start_line = FileKit.readPacket(jsonList,filePath,start_line,threshold);
-            for (int i = 0; i < jsonList.size(); i++) {
+            for (int i = 500; i < jsonList.size(); i++) {
                 JSONObject jo = jsonList.get(i);
                 String url = jo.getString("url");
                 try {
@@ -222,7 +223,7 @@ public class MyThread extends Thread{
      * @param responseHeader 响应头部
      * @param before 网页预处理结果
      */
-    public void extractFingerprintAndEigenWord(ByteArray requestHeader, ByteArray responseHeader, Before before , int page_ID) {
+    public void extractFingerprintAndEigenWord(ByteArray requestHeader, ByteArray responseHeader, Before before , int page_id) {
         Document document = before.getDocument();
         ByteBuilder fingerprint;
         List<EigenWord> vector = new ArrayList<>();

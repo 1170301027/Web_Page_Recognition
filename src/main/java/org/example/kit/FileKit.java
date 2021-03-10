@@ -8,6 +8,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -155,6 +156,39 @@ public class FileKit {
                 if (jsonList.size() >= threshold) break; // 一次最多读入75000条。
             }
             System.out.println("读取JSON数据 ：" + jsonList.size());
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
+
+    public static int readPacket2(String filePath, int startLine) {
+        File file = new File(filePath);
+        int count  = startLine;
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            String line;
+            while (count > 0) {
+                br.readLine();
+                count--;
+            }
+            count = startLine;
+            while ((line = br.readLine()) != null) {
+                count ++;
+                if (line.equals(TAG_SEPARATOR)) {
+                    continue;
+                }
+                try {
+                    JSONObject jsonObject = JSONObject.fromObject(line);
+                    String url = jsonObject.getString("url");
+                    System.out.println("写入 ： "  + url);
+                    System.out.println("startline: " + count);
+                    writeAllLines(Collections.singletonList(url),FilePath.URL_LIST);
+                } catch (JSONException | NumberFormatException e) {
+                    System.out.println("json 解析异常。");
+                }
+            }
             br.close();
         } catch (IOException e) {
             e.printStackTrace();

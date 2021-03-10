@@ -5,6 +5,7 @@ import org.example.kit.FileKit;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -25,27 +26,31 @@ public class ThreadPool {
     private int serial_number = 0;
     private ExecutorService cache;
 
-    private final List<String> websites;
     public ThreadPool(int threshold) {
         this.current_thread_pool_size = 0;
         this.threshold = threshold;
-        this.websites = new ArrayList<>();
     }
 
-    public void doParse() {
+    public List<String> doParse(String filepath) {
+        List<String> result = new ArrayList<>();
         try {
-            List<String> all_lines = FileKit.getAllLines(FilePath.ALL_WEBSITE);
-            for (String line : all_lines) {
-                websites.add(line.split(",")[1]);
+            List<String> all_lines = FileKit.getAllLines(filepath);
+            if (filepath.equals(FilePath.ALL_WEBSITE)) {
+                for (String line : all_lines) {
+                    result.add(line.split(",")[1]);
+                }
+            } else if (filepath.equals(FilePath.URL_LIST)) {
+                return all_lines;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return result;
     }
 
 
     public void run() {
-        doParse();
+        List<String> websites = doParse(FilePath.ALL_WEBSITE);
         System.out.println("完成读取website数据 :" + websites.size());
         int count = 0;
         serial_number = 50000;// 12500
@@ -77,7 +82,7 @@ public class ThreadPool {
     }
 
     public void run2() {
-        doParse();
+        List<String> websites = doParse(FilePath.ALL_WEBSITE);
         System.out.println("完成读取website数据 :" + websites.size());
         int count = 0;
         serial_number = 750000;// 12500
@@ -104,6 +109,35 @@ public class ThreadPool {
             }
             if (serial_number > 800000) {
                 break;
+            }
+        }
+    }
+
+    public void run_crawl_url_list() {
+        List<String> urls = doParse(FilePath.URL_LIST);
+        System.out.println("完成读取url数据 :" + urls.size());
+        int count = 0;
+        serial_number = 508;// 12500
+        while (serial_number < urls.size()) {
+            while (count < threshold && serial_number < urls.size()) {
+                count++;
+                serial_number++;
+                System.out.println("当前count : " + count  + ", 创建新线程 ： " + serial_number);
+                NewThread newThread = new NewThread(urls.get(serial_number), serial_number);
+                this.threads.add(newThread);
+                newThread.start();
+            }
+            try {
+                Thread.sleep(2*1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            //检查活性
+            for (MyThread thread : threads) {
+                if (!thread.isAlive()) {
+                    count--;
+                    threads.remove(thread);
+                }
             }
         }
     }
