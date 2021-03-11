@@ -10,6 +10,7 @@ import org.example.sql.pojo.InvertedIndex;
 import org.example.work.eigenword.EigenWord;
 import sun.security.krb5.internal.PAEncTSEnc;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -74,11 +75,11 @@ public class Matcher {
      * @param candidate_page - 候选网页集
      */
     private void filterByTargetWords(List<Long> words_target, List<IndexResult> candidate_page) {
-        List<List<InvertedIndex>> candidate_words = new ArrayList<>();
+        List<List<InvertedIndex>> candidate_words = new ArrayList<>(); // 候选集所有特征词列表，二维数组，D{p1，p2，，，} ，p{w1，w2，，，}
         for (IndexResult indexResult : candidate_page) {
             int page_id = indexResult.getPageId();
             List<InvertedIndex> words = conn.getMatchMapper().selectFeatureWordsByPageID(page_id);
-            // sort by target_word
+            // 根据目标特征词对候选网页集中的向量进行排序
             List<InvertedIndex> result_words = new ArrayList<>();
             for (Long target_word : words_target) {
                 for (InvertedIndex candidate_word : words) {
@@ -88,19 +89,28 @@ public class Matcher {
                     }
                 }
             }
-            // sort by index
-            Collections.sort(result_words);
+            // 将含有目标特征词的向量，按照索引大小重新排序，向量长度即为网页中含有目标特征词的数量。aj
+//            Collections.sort(result_words);
+            // 加入网页候选集
             candidate_words.add(result_words);
         }
-        // 对每一组网页的特征向量和目标网页的特征向量进行相似度匹配。
+        // 对网页候选集中的网页求最长递增子序列，过滤阈值不符的网页集
         for (int i = 0; i < candidate_words.size(); i++) {
-            int count = 0, maxEnd = 0; // 以POS j,a 结尾的最长公共子序列
-//            for () {
-//                // 二分查找maxEnd中第一个大于POS j,a 的元素，记录二分区间【left,right】
-//
-//            }
+            List<InvertedIndex> page = candidate_words.get(i); // 对其提取最长递增子序列
+            int[] tails = new int[page.size()];
+            int length = 0; // 动态规划+二分查找
+            for (InvertedIndex word : page) {
+                int low = 0, high = length;
+                while (low < high) {
+                    int m = (low + high) / 2;
+                    if (tails[m] < word.getIndex()) low = m + 1;
+                    else high = m;
+                }
+                tails[low] = word.getIndex();
+                if (length == high) length++;
+            }
             // 限定阈值，排除明显不符合的网页，
-            if (count < (3 * count) / 4)
+            if (length < (3 * page.size()) / 4)
                 candidate_page.remove(i);
         }
     }
@@ -160,7 +170,6 @@ public class Matcher {
      * @param n -
      * @param word -
      * @param all_pages -
-     * @return
      */
     private double getLog(int n, InvertedIndex word, List<List<InvertedIndex>> all_pages) {
         int cw = 0;
@@ -189,9 +198,8 @@ public class Matcher {
 
     /**
      * 计算两个向量的余弦相似度
-     * @param source
-     * @param target
-     * @return
+     * @param source -
+     * @param target -
      */
     private double sim(List<Double> source, List<Double> target) {
         if (source.size() != target.size()) {
