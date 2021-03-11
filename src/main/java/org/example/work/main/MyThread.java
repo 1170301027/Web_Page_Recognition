@@ -260,28 +260,27 @@ public class MyThread extends Thread{
         System.out.println();
         System.out.println("words size : " + vector.size());
         List<InvertedIndex> words = new ArrayList<>();
-        synchronized (this) {
-            for (EigenWord eigenWord : vector) {
+
+        for (EigenWord eigenWord : vector) {
 //            System.out.printf(" %x , %d\n",eigenWord.getWord(), eigenWord.getFrequency());
-                InvertedIndex invertedIndex = new InvertedIndex();
-                invertedIndex.setPageId(page_id);
-                invertedIndex.setWord(eigenWord.getWord());
-                invertedIndex.setFrequency(eigenWord.getFrequency());
-                invertedIndex.setIndex(eigenWord.getIndex());
-                words.add(invertedIndex);
-            }
-
-            Fingerprint fp = new Fingerprint();
-            fp.setFpdata(fingerprint.getBytes());
-            fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
-            fp.setPageId(page_id);
-
-            PagetoUrl pagetoUrl = new PagetoUrl();
-            pagetoUrl.setPageId(page_id);
-            pagetoUrl.setUrl(before.getUrl());
-            page_id++;
-            insertDatabase(pagetoUrl,fp,words);
+            InvertedIndex invertedIndex = new InvertedIndex();
+            invertedIndex.setPageId(page_id);
+            invertedIndex.setWord(eigenWord.getWord());
+            invertedIndex.setFrequency(eigenWord.getFrequency());
+            invertedIndex.setIndex(eigenWord.getIndex());
+            words.add(invertedIndex);
         }
+
+        Fingerprint fp = new Fingerprint();
+        fp.setFpdata(fingerprint.getBytes());
+        fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
+        fp.setPageId(page_id);
+
+        PagetoUrl pagetoUrl = new PagetoUrl();
+        pagetoUrl.setPageId(page_id);
+        pagetoUrl.setUrl(before.getUrl());
+        page_id++;
+        insertDatabase(pagetoUrl,fp,words);
 
 //        fp.setLastUpdate(new Timestamp(System.currentTimeMillis()));
 //
@@ -303,12 +302,10 @@ public class MyThread extends Thread{
         String host_url = "https://" + this.website + "/";
         this.urls.offer(host_url);
         String url = this.urls.poll();
-        while (this.urls.size()!= 0 && count < 10) {
-            long start = System.currentTimeMillis();
-            crawl_new(url, serial_number + 500);
-            long end = System.currentTimeMillis();
-            System.out.println("count = " + count + ", timespan = " + (end - start) + ", website = " + website + ", url = " + url);
-        }
+        long start = System.currentTimeMillis();
+        crawl_new(url, serial_number + 500);
+        long end = System.currentTimeMillis();
+        System.out.println("count = " + count + ", timespan = " + (end - start) + ", website = " + website + ", url = " + url);
 //        while (this.urls.size()!= 0 && count < 100) {
 //            String url = this.urls.poll();
 //            long start = System.currentTimeMillis();

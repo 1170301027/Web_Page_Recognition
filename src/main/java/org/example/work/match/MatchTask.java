@@ -1,6 +1,7 @@
 package org.example.work.match;
 
 import org.example.kit.entity.ByteArray;
+import org.example.sql.pojo.InvertedIndex;
 import org.example.work.eigenword.EigenWord;
 
 /**
@@ -30,7 +31,7 @@ public class MatchTask {
     private String path;
     private String host;
     private byte[] fingerprint;
-    private EigenWord[] eigenWords;
+    private InvertedIndex[] eigenWords;
 
     public MatchTask(){
 
@@ -109,10 +110,10 @@ public class MatchTask {
     public void setFingerprint(byte[] fingerprint){
         this.fingerprint = fingerprint;
     }
-    public EigenWord[] getEigenWords(){
+    public InvertedIndex[] getEigenWords(){
         return eigenWords;
     }
-    public void setEigenWords(EigenWord[] eigenWords){
+    public void setEigenWords(InvertedIndex[] eigenWords){
         this.eigenWords = eigenWords;
     }
 }

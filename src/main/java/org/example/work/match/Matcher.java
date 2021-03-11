@@ -30,7 +30,7 @@ public class Matcher {
      */
     public MatchResult match(MatchTask identifiedPage) {
         List<Long> wordsTarget = new ArrayList<>();
-        for (EigenWord eigenWord : identifiedPage.getEigenWords()) {
+        for (InvertedIndex eigenWord : identifiedPage.getEigenWords()) {
             wordsTarget.add(eigenWord.getWord());
         }
         // 倒排索引，根据特征词获取出现该词的网页
@@ -45,9 +45,12 @@ public class Matcher {
         }
         // 过滤候选网页集。
         filterByTargetWords(wordsTarget,candidate);
-        filterByFeatureVector(Arrays.asList(identifiedPage.getEigenWords()),candidate);
         // 网页候选集按特征词数量排序
         Collections.sort(candidate);
+        candidate.removeIf(indexResult -> indexResult.getCount() != wordsTarget.size());
+        //根据特征向量筛选候选集
+        filterByFeatureVector(Arrays.asList(identifiedPage.getEigenWords()),candidate);
+
         List<Integer> pageIds = new ArrayList<>();
         for (IndexResult indexResult : candidate) {
             pageIds.add(indexResult.getPageId());
@@ -92,10 +95,10 @@ public class Matcher {
         // 对每一组网页的特征向量和目标网页的特征向量进行相似度匹配。
         for (int i = 0; i < candidate_words.size(); i++) {
             int count = 0, maxEnd = 0; // 以POS j,a 结尾的最长公共子序列
-            for () {
-                // 二分查找maxEnd中第一个大于POS j,a 的元素，记录二分区间【left,right】
-
-            }
+//            for () {
+//                // 二分查找maxEnd中第一个大于POS j,a 的元素，记录二分区间【left,right】
+//
+//            }
             // 限定阈值，排除明显不符合的网页，
             if (count < (3 * count) / 4)
                 candidate_page.remove(i);
@@ -103,33 +106,43 @@ public class Matcher {
     }
 
     /**
-     * （二轮过滤） 以词频做向量建立网页特征向量,计算网页候选集和 目标网页的特征向量之间的余弦相似度，选出相似度最大的网页，
+     * （二轮过滤） 以权重做向量建立网页特征向量,计算网页候选集和 目标网页的特征向量之间的余弦相似度，选出相似度最大的网页，
      * @param target_words-目标网页特征向量。
      * @param candidate_page -网页候选集
      */
-    private void filterByFeatureVector(List<EigenWord> target_words,List<IndexResult> candidate_page) {
-        List<List<Integer>> candidate_vectors = new ArrayList<>();
-        List<Integer> target_vector = new ArrayList<>();
-        for (EigenWord target_word : target_words) {
-
-            target_vector.add(target_word.getFrequency());
-        }
-        // 提取网页候选集的特征向量，
+    private void filterByFeatureVector(List<InvertedIndex> target_words,List<IndexResult> candidate_page) {
+        int n = target_words.size();
+        List<List<InvertedIndex>> candidate_words = new ArrayList<>();
         for (IndexResult indexResult : candidate_page) {
             int page_id = indexResult.getPageId();
             List<InvertedIndex> words = conn.getMatchMapper().selectFeatureWordsByPageID(page_id);
             // sort by index
             Collections.sort(words);
-            List<Integer> source_vector = new ArrayList<>();
-            for (InvertedIndex word : words) {
-                source_vector.add(word.getFrequency());
-            }
-            candidate_vectors.add(source_vector);
+            candidate_words.add(words);
         }
+        List<List<Double>> candidate_vectors = new ArrayList<>();
+        List<List<InvertedIndex>> current_pages_words = new ArrayList<>(candidate_words);
+        current_pages_words.add(target_words);
+
+        // 计算目标向量
+        List<Double> target_vector = new ArrayList<>();
+        for (InvertedIndex target_word : target_words) {
+            double w = ((double) target_word.getFrequency() / getFrequencyS(target_words)) * getLog(n,target_word,current_pages_words);
+            target_vector.add(w);
+        }
+        // 提取网页候选集的特征向量，
+        for (List<InvertedIndex> page : candidate_words) {
+            List<Double> vector = new ArrayList<>();
+            for (InvertedIndex word : page) {
+                double w = ((double) word.getFrequency() / getFrequencyS(target_words)) * getLog(n,word,current_pages_words);
+                vector.add(w);
+            }
+            candidate_vectors.add(vector);
+        }
+        // 计算余弦相似度
         List<Double> page_sims = new ArrayList<>(); // 记录向量相似度值
         double max_sim = 0.0;
-        // 特征向量相似度比较
-        for (List<Integer> candidate_vector : candidate_vectors) {
+        for (List<Double> candidate_vector : candidate_vectors) {
             double sim = sim(candidate_vector,target_vector);
             if (max_sim < sim) max_sim = sim;
             page_sims.add(sim);
@@ -142,8 +155,58 @@ public class Matcher {
         }
     }
 
-    private double sim(List<Integer> source, List<Integer> target) {
+    /**
+     * 获取商的对数。
+     * @param n -
+     * @param word -
+     * @param all_pages -
+     * @return
+     */
+    private double getLog(int n, InvertedIndex word, List<List<InvertedIndex>> all_pages) {
+        int cw = 0;
+        for (List<InvertedIndex> page : all_pages) {
+            for (InvertedIndex invertedIndex : page) {
+                if (invertedIndex.getWord() == word.getWord()) {
+                    cw++;
+                }
+            }
+        }
+        return Math.log((double) n/cw);
+    }
 
+    /**
+     * 获取频率和
+     * @param words - 一组特征向量
+     * @return
+     */
+    private int getFrequencyS(List<InvertedIndex> words) {
+        int fre = 0;
+        for (InvertedIndex word : words) {
+            fre += word.getFrequency();
+        }
+        return fre;
+    }
+
+    /**
+     * 计算两个向量的余弦相似度
+     * @param source
+     * @param target
+     * @return
+     */
+    private double sim(List<Double> source, List<Double> target) {
+        if (source.size() != target.size()) {
+            System.out.println("向量维度不同");
+            return 0.0;
+        }
+        int n = source.size();
+        int wiwj = 0;
+        int logwi = 0,logwj = 0;
+        for (int i = 0; i < n; i++) {
+            wiwj += source.get(i) * target.get(i);
+            logwi += source.get(i) * source.get(i);
+            logwj += target.get(i) * target.get(i);
+        }
+        return wiwj / (Math.sqrt(logwi) * Math.sqrt(logwj));
     }
 
     /**
