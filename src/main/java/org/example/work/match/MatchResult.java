@@ -30,5 +30,10 @@ public class MatchResult {
     }
 
     public void setWebPageId(Integer pageId) {
+        this.webPageId = pageId;
     }
+    public int getWebPageId() {
+        return webPageId;
+    }
+
 }

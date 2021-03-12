@@ -1,6 +1,5 @@
 package org.example.work.match;
 
-import org.aspectj.weaver.loadtime.Aj;
 import org.example.kit.entity.ByteArray;
 import org.example.sql.conn.ConnectToMySql;
 import org.example.sql.mapper.MatchMapper;
@@ -8,10 +7,10 @@ import org.example.sql.pojo.Fingerprint;
 import org.example.sql.pojo.IndexResult;
 import org.example.sql.pojo.InvertedIndex;
 import org.example.work.eigenword.EigenWord;
-import sun.security.krb5.internal.PAEncTSEnc;
 
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @Classname Matcher
@@ -20,7 +19,6 @@ import java.util.*;
  * @Created by shuaif
  */
 public class Matcher {
-    private List<EigenWord> candidateEigenWords; // 特征词候选集
     private ConnectToMySql conn = new ConnectToMySql();
     private MatchMapper matchMapper = conn.getMatchMapper();
 
@@ -44,13 +42,14 @@ public class Matcher {
             matchResult.setSuccess(false);
             return matchResult;
         }
-        // 过滤候选网页集。
-        filterByTargetWords(wordsTarget,candidate);
         // 网页候选集按特征词数量排序
         Collections.sort(candidate);
-        candidate.removeIf(indexResult -> indexResult.getCount() != wordsTarget.size());
+        candidate.removeIf(indexResult -> indexResult.getCount() < wordsTarget.size());
+        System.out.println("候选网页集大小 ：" + candidate.size());
+        // 过滤候选网页集。
+        filterByTargetWords(wordsTarget,candidate);
         //根据特征向量筛选候选集
-        filterByFeatureVector(Arrays.asList(identifiedPage.getEigenWords()),candidate);
+        filterByFeatureVector(identifiedPage.getEigenWords(),candidate);
 
         List<Integer> pageIds = new ArrayList<>();
         for (IndexResult indexResult : candidate) {
@@ -64,6 +63,11 @@ public class Matcher {
         if(target.getSimilarity() > 0.80){ // 阈值
             matchResult.setSuccess(true);
             matchResult.setWebPageId(target.getPageId());
+        }
+
+        System.out.println("匹配详情 : " + fps.size() + " 个匹配项");
+        for (Fingerprint fp : fps) {
+            System.out.println(fp.toString());
         }
 
         return matchResult;
@@ -228,12 +232,19 @@ public class Matcher {
         int count = 0;
         while (count < 3)  {
             count ++;
+
             byte first_byte = fingerprint[index];
             byte second_byte = fingerprint[index+1];
-            int length = (first_byte ^ 0x0F) << 8 + second_byte ^ 0xFF;
-            int begin = index + 1;
-            int end = index + length + 1;
-            result.add(new ByteArray(fingerprint, begin, end));
+            int length = ((first_byte & 0x0F) << 8) + (second_byte & 0xFF);
+            System.out.println("index : "+ index +",片段指纹长度 ：" + length);
+            int begin = index + 2;
+            int end = index + length + 2;
+            if (count == (first_byte >> 4))
+                result.add(new ByteArray(fingerprint, begin, end));
+            else {
+                System.out.println("标志位 ‘" + count + "’ 的指纹不存在。" );
+                result.add(new ByteArray(new byte[0]));
+            }
             index = end;
         }
         return result;
@@ -246,6 +257,10 @@ public class Matcher {
      * @return 相似度
      */
     private double linerSimilarity(byte[] source, byte[] target) {
+        if (source == null || target == null)
+            return 0.0;
+        if (source.length == 0 || target.length == 0)
+            return 0.0;
         int[][] c = new int[source.length][target.length];
         for (int i = 0; i < source.length; i++) {
             for (int j = 0; j < target.length; j++) {

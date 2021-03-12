@@ -6,6 +6,7 @@ import org.example.sql.annotation.Table;
 import org.example.sql.annotation.Transient;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 
 @Table
 public class Fingerprint implements Comparable<Fingerprint> {
@@ -46,5 +47,10 @@ public class Fingerprint implements Comparable<Fingerprint> {
     @Override
     public int compareTo(Fingerprint o){
         return Double.compare(o.similarity, similarity);
+    }
+
+    @Override
+    public String toString() {
+        return "["+ pageId + ",  " + similarity + "]\n" + "fpdata : " + Arrays.toString(fpdata);
     }
 }

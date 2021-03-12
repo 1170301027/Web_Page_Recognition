@@ -34,9 +34,9 @@ public class MyThread extends Thread{
     private final int serial_number;
     private final String website;
     private Queue<String> urls;
-    private int threshold = 100; // 指定一个网站爬取网页的最大数量。
+    private final int threshold = 100; // 指定一个网站爬取网页的最大数量。
     private int count = 0;
-    private static ConnectToMySql conn = new ConnectToMySql();
+    private static final ConnectToMySql conn = new ConnectToMySql();
 
 //    public static int page_id = 50417;
 
@@ -51,7 +51,7 @@ public class MyThread extends Thread{
     }
 
     /**
-     * 单独处理一个URL：爬取+储存原始报文+解析+提取指纹特征
+     * 单独处理一个URL：爬取+储存原始报文+解析+提取指纹特征（爬数据）
      * @param url 网页 URL
      */
     private void crawl(String url) {
@@ -59,7 +59,7 @@ public class MyThread extends Thread{
         System.out.println(url);
         try {
             BiSupplier<URL,byte[]> response = Objects.requireNonNull(WebCrawl.getHttpPacketLoadedWithHTML(url));
-            FileKit.writePacket(url,response.second());
+//            FileKit.writePacket(url,response.second());
             count++ ;
             byte[] data = response.second();
 
@@ -97,31 +97,10 @@ public class MyThread extends Thread{
     }
 
     /**
-     * 从文件中读取报文数据并解析建立指纹特征库，
+     * 爬取指定URL网页进行指纹特征提取，并插入数据库
+     * @param url -
+     * @param page_id -网页URL
      */
-    public void buildFpAndWordsLib() {
-        List<JSONObject> jsonList = new ArrayList<>(); // json列表
-        String filePath = FilePath.ROOT_PATH + "index2.data"; // 读取源文件
-        int start_line = Integer.parseInt(FileKit.readALineFromFile(FilePath.LAST_READ_LINE)); // 上一次读到行数
-        int threshold = 20000 ; // 限定一次读入内存最大数据
-        int page_id = Integer.parseInt(FileKit.readALineFromFile(FilePath.LAST_PAGE_ID));
-        do {
-            jsonList.clear();
-            start_line = FileKit.readPacket(jsonList,filePath,start_line,threshold);
-            for (int i = 0; i < jsonList.size(); i++) {
-                JSONObject jo = jsonList.get(i);
-                String url = jo.getString("url");
-                if (url.contains("10bestesingleboersen.de")) continue;
-                byte[] data = jo.getString("data").getBytes();
-                System.out.println(i);
-                System.out.println("start line : " + start_line);
-                doParseAndExtract(url,data,page_id++);
-            }
-            FileKit.writeALineToFile(start_line + "",FilePath.LAST_READ_LINE);
-            FileKit.writeALineToFile(String.valueOf(page_id),FilePath.LAST_PAGE_ID);
-        } while (jsonList.size() >= threshold);
-    }
-
     public void crawl_new(String url, int page_id) {
         if (url == null) return ;
         System.out.println(url);
@@ -152,6 +131,9 @@ public class MyThread extends Thread{
         }
     }
 
+    /**
+     * 从文件中读取网页源数据建立指纹库
+     */
     public void buildFpAndWordsLib_new() {
         List<JSONObject> jsonList = new ArrayList<>(); // json列表
         String filePath = FilePath.ROOT_PATH + "index-finish.data"; // 读取源文件
@@ -218,7 +200,7 @@ public class MyThread extends Thread{
 
 
     /**
-     * 提取指纹以及网页特征向量
+     * 提取指纹以及网页特征向量,插入数据库
      * @param requestHeader 请求头部
      * @param responseHeader 响应头部
      * @param before 网页预处理结果

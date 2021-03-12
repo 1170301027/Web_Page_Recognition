@@ -119,12 +119,6 @@ public class MyBatisTest {
     }
 
     @Test
-    public void buildFpAndWordsLib() {
-        MyThread myThread = new MyThread();
-        myThread.buildFpAndWordsLib();
-    }
-
-    @Test
     public void buildFpAndWordsLib_new() {
         MyThread myThread = new MyThread();
         myThread.buildFpAndWordsLib_new();

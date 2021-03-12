@@ -4,6 +4,8 @@ import org.example.kit.entity.ByteArray;
 import org.example.sql.pojo.InvertedIndex;
 import org.example.work.eigenword.EigenWord;
 
+import java.util.List;
+
 /**
  * @Classname MatchTask
  * @Description 匹配任务：存储目标网页相关信息
@@ -31,7 +33,7 @@ public class MatchTask {
     private String path;
     private String host;
     private byte[] fingerprint;
-    private InvertedIndex[] eigenWords;
+    private List<InvertedIndex> eigenWords;
 
     public MatchTask(){
 
@@ -110,10 +112,10 @@ public class MatchTask {
     public void setFingerprint(byte[] fingerprint){
         this.fingerprint = fingerprint;
     }
-    public InvertedIndex[] getEigenWords(){
+    public List<InvertedIndex> getEigenWords(){
         return eigenWords;
     }
-    public void setEigenWords(InvertedIndex[] eigenWords){
+    public void setEigenWords(List<InvertedIndex> eigenWords){
         this.eigenWords = eigenWords;
     }
 }
