@@ -28,6 +28,14 @@
         select url from page_url where page_id = #{id}
     </select>
 
+    <select id="selectFingerprint" resultType="Fingerprint" useCache="false" flushCache="true">
+        select * from fingerprint
+    </select>
+
+    <select id="selectFeatureWords" resultType="InvertedIndex" useCache="false" flushCache="true">
+        select * from inverted_index
+    </select>
+
     <insert id="insertFingerprints">
         INSERT INTO fingerprint (page_id,last_update,fpdata) VALUES
         <foreach collection="list" item="s" separator=",">

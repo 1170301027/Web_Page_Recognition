@@ -25,4 +25,11 @@ public interface MatchMapper extends BaseMapper {
     void insertIptoHost(IptoHost iptoHost);
 
     void insertPagetoUrl(@Param("list") List<PagetoUrl> pagetoUrls);
+
+    // 一次读入内存
+    List<Fingerprint> selectFingerprint();
+
+    List<InvertedIndex> selectFeatureWords();
+
+
 }

@@ -236,7 +236,7 @@ public class Matcher {
             byte first_byte = fingerprint[index];
             byte second_byte = fingerprint[index+1];
             int length = ((first_byte & 0x0F) << 8) + (second_byte & 0xFF);
-            System.out.println("index : "+ index +",片段指纹长度 ：" + length);
+//            System.out.println("index : "+ index +",片段指纹长度 ：" + length);
             int begin = index + 2;
             int end = index + length + 2;
             if (count == (first_byte >> 4))
@@ -283,11 +283,11 @@ public class Matcher {
         List<ByteArray> target_fp_parts = getPartOfFingerprint(fingerprint);
         for (Fingerprint fp : fps) {
             List<ByteArray> source_fp_parts = getPartOfFingerprint(fp.getFpdata());
-            double sim1,sim2,sim3;
-            sim1 = linerSimilarity(source_fp_parts.get(0).getBytes(),target_fp_parts.get(0).getBytes());
-            sim2 = linerSimilarity(source_fp_parts.get(1).getBytes(),target_fp_parts.get(1).getBytes());
-            sim3 = linerSimilarity(source_fp_parts.get(2).getBytes(),target_fp_parts.get(2).getBytes());
-            double sim = 0.5 * sim1 + 0.3 * sim2 + 0.2 * sim3;
+            double resp_head_sim,html_head_sim,html_body_sim;
+            resp_head_sim = linerSimilarity(source_fp_parts.get(0).getBytes(),target_fp_parts.get(0).getBytes());
+            html_head_sim = linerSimilarity(source_fp_parts.get(1).getBytes(),target_fp_parts.get(1).getBytes());
+            html_body_sim = linerSimilarity(source_fp_parts.get(2).getBytes(),target_fp_parts.get(2).getBytes());
+            double sim = 0.5 * resp_head_sim + 0.3 * html_head_sim + 0.2 * html_body_sim;
             fp.setSimilarity(sim);
         }
         Collections.sort(fps);

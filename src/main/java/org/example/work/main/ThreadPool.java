@@ -81,43 +81,12 @@ public class ThreadPool {
         }
     }
 
-    public void run2() {
-        List<String> websites = doParse(FilePath.ALL_WEBSITE);
-        System.out.println("完成读取website数据 :" + websites.size());
-        int count = 0;
-        serial_number = 750000;// 12500
-        while (serial_number < websites.size()) {
-            while (count < threshold && serial_number < websites.size()) {
-                count++;
-                serial_number++;
-                System.out.println("当前count : " + count  + ", 创建新线程 ： " + serial_number);
-                MyThread newThread = new MyThread(serial_number, websites.get(serial_number));
-                this.threads.add(newThread);
-                newThread.start();
-            }
-            try {
-                Thread.sleep(2*1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            //检查活性
-            for (MyThread thread : threads) {
-                if (!thread.isAlive()) {
-                    count--;
-                    threads.remove(thread);
-                }
-            }
-            if (serial_number > 800000) {
-                break;
-            }
-        }
-    }
 
     public void run_crawl_url_list() {
         List<String> urls = doParse(FilePath.URL_LIST);
         System.out.println("完成读取url数据 :" + urls.size());
         int count = 0;
-        serial_number = 13300;// 12500
+        serial_number = 689147;// 12500
         while (serial_number < urls.size()) {
             while (count < threshold && serial_number < urls.size()) {
                 count++;
