@@ -169,6 +169,7 @@ public class MyThread extends Thread{
                 iptoHost.setHost(line.split(",")[1]);
                 conn.getMatchMapper().insertIptoHost(iptoHost);
             }
+            conn.commit();
         } catch (IOException e) {
             e.printStackTrace();
         }
