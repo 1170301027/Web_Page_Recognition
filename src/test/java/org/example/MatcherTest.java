@@ -58,7 +58,9 @@ public class MatcherTest {
                 System.out.printf("%02x ",packet[i]);
             }
             System.out.println();
-            TrafficAnalysis.clientHelloAnalysis(packet);
+            MatchTask matchTask = new MatchTask();
+            TrafficAnalysis.clientHelloAnalysis(packet,matchTask);
+            System.out.println(matchTask.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }

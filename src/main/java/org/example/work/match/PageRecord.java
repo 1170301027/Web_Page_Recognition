@@ -1,6 +1,7 @@
 package org.example.work.match;
 
 import org.example.sql.pojo.Fingerprint;
+import org.example.sql.pojo.InvertedIndex;
 import org.example.work.eigenword.EigenWord;
 
 import java.util.List;
@@ -14,7 +15,33 @@ import java.util.List;
 public class PageRecord {
     private int pageID;
     private Fingerprint fp;
-    private List<EigenWord> words;
+    private List<InvertedIndex> words;
 
+    public void setPageID(int pageID) {
+        this.pageID = pageID;
+    }
 
+    public void setFp(Fingerprint fp) {
+        this.fp = fp;
+    }
+
+    public void setWords(List<InvertedIndex> words) {
+        this.words = words;
+    }
+
+    public int getPageID() {
+        return pageID;
+    }
+
+    public Fingerprint getFp() {
+        return fp;
+    }
+
+    public List<InvertedIndex> getWords() {
+        return words;
+    }
+
+    public int getCount() {
+        return this.words.size();
+    }
 }

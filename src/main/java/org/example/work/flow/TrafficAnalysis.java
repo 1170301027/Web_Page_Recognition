@@ -2,8 +2,10 @@ package org.example.work.flow;
 
 import org.example.kit.ByteBuffer;
 import org.example.kit.entity.ByteArray;
+import org.example.work.match.MatchTask;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -13,26 +15,62 @@ import java.util.List;
  * @Created by shuaif
  */
 public class TrafficAnalysis {
-    private static final int DATA_FRAME_HEAD_LENGTH = 40 + 14;
+    private static final int DATA_PCAP_FILE_HEAD = 24 + 16;
+    private static final int DATA_FRAME_HEAD_LENGTH = 14;
     private static final int IP_PACKET_HEAD_LENGTH = 20;
     private static final int TCP_HEAD_LENGTH = 20; // 暂定无扩展
-    public static void responseAnalysis(byte[] responsePacket) {
 
+    private mac_header macHeader;
+    private ip_header ipHeader;
+    private tcp_header tcpHeader;
+    private ssl_handshake handshake;
+
+    public static void responseAnalysis(byte[] responsePacket, MatchTask matchTask) {
+        System.out.println("正在解析数据包，，，");
+        ByteArray buffer = new ByteArray(responsePacket);
+//        ByteArray buffer = new ByteArray(packet);
+//        int index = 0;
+        // 各层头部解析
+        int index = DATA_PCAP_FILE_HEAD;
+        mac_header macHeader = new mac_header(buffer.subBytes(index,index + DATA_FRAME_HEAD_LENGTH));
+        index += DATA_FRAME_HEAD_LENGTH;
+        ip_header ipHeader = new ip_header(buffer.subBytes(index,index + IP_PACKET_HEAD_LENGTH));
+        index += IP_PACKET_HEAD_LENGTH;
+        tcp_header tcpHeader = new tcp_header(buffer.subBytes(index,index + TCP_HEAD_LENGTH));
+        index += TCP_HEAD_LENGTH;
+        matchTask.setResponsePacket(new ByteArray(buffer.subBytes(index)));
+        matchTask.setClientIP(ipHeader.getSource_ip());
+        matchTask.setClientPort(tcpHeader.getSrc_port());
+        matchTask.setServerIP(ipHeader.getTarget_ip());
+        matchTask.setServerPort(tcpHeader.getDst_port());
     }
 
-    public static void clientHelloAnalysis(byte[] packet) {
+    public static void clientHelloAnalysis(byte[] packet, MatchTask matchTask) {
         System.out.println("正在解析数据包，，，");
         // 跳过链路层，网络层，以及传输层报文头部
-        ByteArray buffer = new ByteArray(packet,DATA_FRAME_HEAD_LENGTH+IP_PACKET_HEAD_LENGTH+TCP_HEAD_LENGTH,packet.length + 1);
+        ByteArray buffer = new ByteArray(packet);
 //        ByteArray buffer = new ByteArray(packet);
-        int index = 0;
+//        int index = 0;
+        // 各层头部解析
+        int index = DATA_PCAP_FILE_HEAD;
+        mac_header macHeader = new mac_header(buffer.subBytes(index,index + DATA_FRAME_HEAD_LENGTH));
+        index += DATA_FRAME_HEAD_LENGTH;
+        ip_header ipHeader = new ip_header(buffer.subBytes(index,index + IP_PACKET_HEAD_LENGTH));
+        index += IP_PACKET_HEAD_LENGTH;
+        tcp_header tcpHeader = new tcp_header(buffer.subBytes(index,index + TCP_HEAD_LENGTH));
+        index += TCP_HEAD_LENGTH;
+        matchTask.setResponsePacket(new ByteArray(buffer.subBytes(index)));
+        // TLS
         byte type = buffer.get(index++);
         if (type != 0x16) {
             System.out.println("非handshake类型报文。");
             return ;
         }
-        ssl_handshake handshake = new ssl_handshake((char) type,getShort(buffer.subBytes(index,index + 2)),
-                getShort(buffer.subBytes(index + 2, index + 4)),buffer.subBytes(index + 4));
+        // 解析数据报
+        ssl_handshake handshake = new ssl_handshake((char) type,help.getShort(buffer.subBytes(index,index + 2)),
+                help.getShort(buffer.subBytes(index + 2, index + 4)),buffer.subBytes(index + 4));
+        boolean flag = false;
+        String host = "";
         if (handshake.isIs_client_hello()) {
             System.out.println("是 client hello 请求报文");
             if (handshake.isIs_get_server_name()) {
@@ -41,24 +79,196 @@ public class TrafficAnalysis {
                     if (extension.getType() == 0) {
                         ByteArray byteArray = new ByteArray(extension.getData());
                         System.out.println("host : " + new String(byteArray.subBytes(5)));
+                        host = new String(byteArray.subBytes(5));
+                        flag = true;
                         break;
                     }
                 }
             }
         }
+
+        // MatchTask;
+        matchTask.setClientIP(ipHeader.getSource_ip());
+        matchTask.setClientPort(tcpHeader.getSrc_port());
+        matchTask.setServerIP(ipHeader.getTarget_ip());
+        matchTask.setServerPort(tcpHeader.getDst_port());
+        matchTask.setHost(host);
+        matchTask.setPath("/");
     }
 
-    public static short getShort(byte[] bytes) {
-        if (bytes == null || bytes.length!=2) {
-            System.out.println("数据格式错误");
-            return 0;
-        }
-        byte argB1 = bytes[0];
-        byte argB2 = bytes[1];
-        return (short) ((argB1 & 0xFF)| (argB2 << 8));
+}
+
+// 链路层数据帧头
+class mac_header {
+    private byte[] dst_mac;
+    private byte[] src_mac;
+    private short eth_type; // 以太网类型
+    public mac_header(byte[] content) {
+        ByteArray buffer = new ByteArray(content);
+        this.dst_mac = buffer.subBytes(0,6);
+        this.src_mac = buffer.subBytes(6,12);
+        this.eth_type = help.getShort(buffer.subBytes(12,14));
+    }
+
+    public byte[] getDst_mac() {
+        return dst_mac;
+    }
+
+    public byte[] getSrc_mac() {
+        return src_mac;
+    }
+
+    public short getEth_type() {
+        return eth_type;
     }
 }
-// SSL头部 TVL 格式
+
+// IP数据报头部
+class ip_header {
+    private int version; // 半字节
+    private int header_length; // 半字节
+    private byte tos; // 服务类型
+    private short total_length;
+    private short id;
+    private short fragment_offset;
+    private byte ttl;
+    private byte protocol;
+    private byte[] source_ip;// 4
+    private byte[] target_ip;// 4
+
+    public ip_header(byte[] content) {
+        ByteArray buffer = new ByteArray(content);
+        int index=0;
+        byte temp = buffer.get(index++);
+        this.version = (temp >> 4) & 0xF;
+        this.header_length = temp & 0xF;
+        this.tos = buffer.get(index++);
+        this.total_length = help.getShort(buffer.subBytes(index,index + 2));
+        index += 2;
+        this.id = help.getShort(buffer.subBytes(index,index + 2));
+        index += 2;
+        this.fragment_offset = help.getShort(buffer.subBytes(index,index + 2));
+        index += 2;
+        this.ttl = buffer.get(index++);
+        this.protocol = buffer.get(index++);
+        this.source_ip = buffer.subBytes(index,index + 4);
+        index += 4;
+        this.target_ip = buffer.subBytes(index,index + 4);
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public int getHeader_length() {
+        return header_length;
+    }
+
+    public byte getTos() {
+        return tos;
+    }
+
+    public short getTotal_length() {
+        return total_length;
+    }
+
+    public short getId() {
+        return id;
+    }
+
+    public short getFragment_offset() {
+        return fragment_offset;
+    }
+
+    public byte getTtl() {
+        return ttl;
+    }
+
+    public byte getProtocol() {
+        return protocol;
+    }
+
+    public byte[] getSource_ip() {
+        return source_ip;
+    }
+
+    public byte[] getTarget_ip() {
+        return target_ip;
+    }
+}
+
+// TCP数据报头
+class tcp_header {
+    private short src_port;
+    private short dst_port;
+    private int sequence;
+    private int acknowledge_number;
+    private int header_length; // 半字节
+    private byte[] flags; // 一个半字节
+    private short window_size;
+    private short checksum;
+    private short urgent_pointer;
+
+    public tcp_header(byte[] content) {
+        ByteArray buffer = new ByteArray(content);
+        int index = 0;
+        this.src_port = help.getShort(buffer.subBytes(index,index + 2));
+        index += 2;
+        this.dst_port = help.getShort(buffer.subBytes(index,index + 2));
+        index += 2;
+        this.sequence = help.getInteger(buffer.subBytes(index, index + 4));
+        index += 4;
+        this.acknowledge_number = help.getInteger(buffer.subBytes(index,index + 4));
+        index += 4;
+        this.header_length = (buffer.get(index) >> 4) & 0xF;
+        this.flags = buffer.subBytes(index, index + 2);
+        this.flags[0] &= 0x0F;
+        index += 2;
+        this.window_size = help.getShort(buffer.subBytes(index,index + 2));
+        index += 2;
+        this.checksum = help.getShort(buffer.subBytes(index,index + 2));
+        index += 2;
+        this.urgent_pointer = help.getShort(buffer.subBytes(index,index + 2));
+    }
+
+    public short getSrc_port() {
+        return src_port;
+    }
+
+    public short getDst_port() {
+        return dst_port;
+    }
+
+    public int getSequence() {
+        return sequence;
+    }
+
+    public int getAcknowledge_number() {
+        return acknowledge_number;
+    }
+
+    public int getHeader_length() {
+        return header_length;
+    }
+
+    public byte[] getFlags() {
+        return flags;
+    }
+
+    public short getWindow_size() {
+        return window_size;
+    }
+
+    public short getChecksum() {
+        return checksum;
+    }
+
+    public short getUrgent_pointer() {
+        return urgent_pointer;
+    }
+}
+
+// TLS头部 TVL 格式
 class ssl_handshake {
     private char type; // handshake = 0x16
     private short version; // TLS 1.0 = 0x0301  1.1 0x0302 类推。
@@ -309,4 +519,26 @@ class ssl_extension {
     }
 }
 
+class help {
+    public static short getShort(byte[] bytes) {
+        if (bytes == null || bytes.length!=2) {
+            System.out.println("数据格式错误，"+ Arrays.toString(bytes));
+            return 0;
+        }
+        byte argB1 = bytes[0];
+        byte argB2 = bytes[1];
+        return (short) ((argB1 << 8)| (argB2 & 0xFF));
+    }
+
+    public static int getInteger(byte[] bytes) {
+        if (bytes == null || bytes.length!=4) {
+            System.out.println("数据个格式错误，"+ Arrays.toString(bytes));
+            return 0;
+        }
+        return bytes[3] & 0xFF |
+                (bytes[2] & 0xFF) << 8 |
+                (bytes[1] & 0xFF) << 16 |
+                (bytes[0] & 0xFF) << 24;
+    }
+}
 

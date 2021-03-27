@@ -1,9 +1,12 @@
 package org.example.work.crawl;
 
 
+import org.example.auxiliary.FilePath;
+import org.example.kit.FileKit;
 import org.example.kit.StreamKit;
 import org.example.kit.entity.BiSupplier;
 import org.example.kit.entity.ByteArray;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -127,11 +130,14 @@ public class WebCrawl {
     public static Document webCrawl(String URL){
         Document doc = null;
         try {
-              doc = Jsoup.connect(URL).get();
-//            Elements elements = doc.select("");
-//            for (Element element : elements) {
-//                System.out.println(element.text() + ":" + element.attr("href"));
-//            }
+            Connection conn = Jsoup.connect(URL);
+            doc = conn.get();
+//            System.out.println(doc.html());
+            FileKit.writeALineToFile(doc.html(), FilePath.ROOT_PATH + "source code");
+//          Elements elements = doc.select("");
+//          for (Element element : elements) {
+//              System.out.println(element.text() + ":" + element.attr("href"));
+//          }
         } catch (IOException e) {
             e.printStackTrace();
         }

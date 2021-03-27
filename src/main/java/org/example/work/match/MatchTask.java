@@ -4,6 +4,7 @@ import org.example.kit.entity.ByteArray;
 import org.example.sql.pojo.InvertedIndex;
 import org.example.work.eigenword.EigenWord;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -117,5 +118,15 @@ public class MatchTask {
     }
     public void setEigenWords(List<InvertedIndex> eigenWords){
         this.eigenWords = eigenWords;
+    }
+
+    @Override
+    public String toString() {
+        return "[ client ip : "+ Arrays.toString(clientIP) + "]\n" +
+                "[ client port : "+ clientPort + "]\n" +
+                "[ server ip : "+ Arrays.toString(serverIP) + "]\n" +
+                "[ server port : "+ serverPort + "]\n" +
+                "[ host : "+ host + "]\n" +
+                "[ path : "+ path + "]\n";
     }
 }
