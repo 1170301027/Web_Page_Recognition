@@ -67,17 +67,23 @@ public class TrafficAnalysis {
             return ;
         }
         // 解析数据报
-        ssl_handshake handshake = new ssl_handshake((char) type,help.getShort(buffer.subBytes(index,index + 2)),
+        ssl_handshake handshake = new ssl_handshake(type,help.getShort(buffer.subBytes(index,index + 2)),
                 help.getShort(buffer.subBytes(index + 2, index + 4)),buffer.subBytes(index + 4));
         boolean flag = false;
         String host = "";
         if (handshake.isIs_client_hello()) {
             System.out.println("是 client hello 请求报文");
             if (handshake.isIs_get_server_name()) {
-                System.out.println("服务器域名可获得");
+                System.out.println("SNI可获得");
                 for (ssl_extension extension : handshake.getSsl_hello().getExtensions()) {
                     if (extension.getType() == 0) {
                         ByteArray byteArray = new ByteArray(extension.getData());
+                        System.out.println(macHeader.toString());
+                        System.out.println(ipHeader.toString());
+                        System.out.println(tcpHeader.toString());
+                        System.out.println(handshake.toString());
+                        System.out.println(handshake.getSsl_hello().toString());
+                        System.out.println(extension.toString());
                         System.out.println("host : " + new String(byteArray.subBytes(5)));
                         host = new String(byteArray.subBytes(5));
                         flag = true;
@@ -120,6 +126,15 @@ class mac_header {
 
     public short getEth_type() {
         return eth_type;
+    }
+
+    @Override
+    public String toString() {
+        return "mac_header{" +
+                "dst_mac=" + Arrays.toString(dst_mac) +
+                ", src_mac=" + Arrays.toString(src_mac) +
+                ", eth_type=" + eth_type +
+                '}';
     }
 }
 
@@ -195,6 +210,22 @@ class ip_header {
     public byte[] getTarget_ip() {
         return target_ip;
     }
+
+    @Override
+    public String toString() {
+        return "ip_header{" +
+                "version=" + version +
+                ", header_length=" + header_length +
+                ", tos=" + tos +
+                ", total_length=" + total_length +
+                ", id=" + id +
+                ", fragment_offset=" + fragment_offset +
+                ", ttl=" + ttl +
+                ", protocol=" + protocol +
+                ", source_ip=" + Arrays.toString(source_ip) +
+                ", target_ip=" + Arrays.toString(target_ip) +
+                '}';
+    }
 }
 
 // TCP数据报头
@@ -266,11 +297,26 @@ class tcp_header {
     public short getUrgent_pointer() {
         return urgent_pointer;
     }
+
+    @Override
+    public String toString() {
+        return "tcp_header{" +
+                "src_port=" + src_port +
+                ", dst_port=" + dst_port +
+                ", sequence=" + sequence +
+                ", acknowledge_number=" + acknowledge_number +
+                ", header_length=" + header_length +
+                ", flags=" + Arrays.toString(flags) +
+                ", window_size=" + window_size +
+                ", checksum=" + checksum +
+                ", urgent_pointer=" + urgent_pointer +
+                '}';
+    }
 }
 
 // TLS头部 TVL 格式
 class ssl_handshake {
-    private char type; // handshake = 0x16
+    private int type; // handshake = 0x16
     private short version; // TLS 1.0 = 0x0301  1.1 0x0302 类推。
     private short length;
     private byte[] content;
@@ -278,8 +324,8 @@ class ssl_handshake {
     private boolean is_client_hello = true;
     private boolean is_get_server_name;
 
-    public ssl_handshake(char type, short version, short length, byte[] content) {
-        this.type = type;
+    public ssl_handshake(byte type, short version, short length, byte[] content) {
+        this.type = type & 0xFF;
         this.version = version;
         this.length = length;
         this.content = content;
@@ -323,7 +369,7 @@ class ssl_handshake {
 //        System.out.println(extension_length);
         List<ssl_extension> extensions = parseExtensions(buffer.subBytes(index));
 
-        this.ssl_hello = new ssl_hello((char) handshake_type,length,version,random,session_id_length
+        this.ssl_hello = new ssl_hello(handshake_type,length,version,random,session_id_length
                 ,session_id,cipher_suites_length,cipher_suites,compression_methods_length,compression_methods,extension_length,extensions);
     }
 
@@ -363,7 +409,7 @@ class ssl_handshake {
         return  is_get_server_name;
     }
 
-    public char getType() {
+    public int getType() {
         return type;
     }
 
@@ -382,10 +428,23 @@ class ssl_handshake {
     public ssl_hello getSsl_hello() {
         return ssl_hello;
     }
+
+    @Override
+    public String toString() {
+        return "ssl_handshake{" +
+                "type=" + type +
+                ", version=" + version +
+                ", length=" + length +
+                ", content=" + Arrays.toString(content) +
+                ", ssl_hello=" + ssl_hello +
+                ", is_client_hello=" + is_client_hello +
+                ", is_get_server_name=" + is_get_server_name +
+                '}';
+    }
 }
 
 class ssl_hello {
-    private char handshake_type; // client = 1
+    private int handshake_type; // client = 1
     private byte[] length = new byte[3];
     private short version; // TLS 1.0 = 0x0301  1.1 0x0302 类推。
     private ssl_random random ;   // 跳过32个字节。
@@ -450,10 +509,10 @@ class ssl_hello {
         return extensions;
     }
 
-    public ssl_hello(char handshake_type, byte[] length, short version
+    public ssl_hello(byte handshake_type, byte[] length, short version
             , ssl_random random, char session_id_length, byte[] session_id, short cipher_suites_length, byte[] cipher_suites
             , char compression_methods_length, byte[] compression_method, short extensions_length, List<ssl_extension> extensions) {
-        this.handshake_type = handshake_type;
+        this.handshake_type = handshake_type & 0xFF;
         this.length = length;
         this.version = version;
         this.random = random;
@@ -465,6 +524,24 @@ class ssl_hello {
         this.compression_method = compression_method;
         this.extensions_length = extensions_length;
         this.extensions = extensions;
+    }
+
+    @Override
+    public String toString() {
+        return "ssl_hello{" +
+                "handshake_type=" + handshake_type +
+                ", length=" + Arrays.toString(length) +
+                ", version=" + version +
+                ", random=" + random +
+                ", session_id_length=" + session_id_length +
+                ", session_id=" + Arrays.toString(session_id) +
+                ", cipher_suites_length=" + cipher_suites_length +
+                ", cipher_suites=" + Arrays.toString(cipher_suites) +
+                ", compression_methods_length=" + compression_methods_length +
+                ", compression_method=" + Arrays.toString(compression_method) +
+                ", extensions_length=" + extensions_length +
+                ", extensions=" + extensions +
+                '}';
     }
 }
 
@@ -492,6 +569,16 @@ class server_name {
     public byte[] getServer_name() {
         return server_name;
     }
+
+    @Override
+    public String toString() {
+        return "server_name{" +
+                "list_length=" + list_length +
+                ", type=" + type +
+                ", length=" + length +
+                ", server_name=" + new String(server_name) +
+                '}';
+    }
 }
 
 // TLS 扩展字段
@@ -516,6 +603,15 @@ class ssl_extension {
 
     public byte[] getData() {
         return data;
+    }
+
+    @Override
+    public String toString() {
+        return "ssl_extension{" +
+                "type=" + type +
+                ", length=" + length +
+                ", data=" + Arrays.toString(data) +
+                '}';
     }
 }
 

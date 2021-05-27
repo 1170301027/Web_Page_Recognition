@@ -25,12 +25,12 @@ import java.sql.Timestamp;
 import java.util.*;
 
 /**
- * @Classname MyThread
+ * @Classname
  * @Description 线程，
  * @Date 2020/11/10 20:26
  * @Created by shuaif
  */
-public class MyThread extends Thread{
+public class ThreadToCrawlPages extends Thread{
     private final int serial_number;
     private final String website;
     private Queue<String> urls;
@@ -40,11 +40,11 @@ public class MyThread extends Thread{
 
 //    public static int page_id = 50417;
 
-    public MyThread() {
+    public ThreadToCrawlPages() {
         this.serial_number = 0;
         this.website = "0.0";
     }
-    public MyThread(int serial_number,String website) {
+    public ThreadToCrawlPages(int serial_number, String website) {
         this.serial_number = serial_number;
         this.website = website;
         this.urls = new LinkedList<>();

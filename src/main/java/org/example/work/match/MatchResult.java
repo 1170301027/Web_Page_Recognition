@@ -12,6 +12,7 @@ public class MatchResult {
     private boolean success;
 
     private int webPageId; // 识别成功网页ID
+    private PageRecord webPage;
 
     public MatchTask getTarget() {
         return target;
@@ -35,5 +36,18 @@ public class MatchResult {
     public int getWebPageId() {
         return webPageId;
     }
+
+    public void setWebPageId(int webPageId) {
+        this.webPageId = webPageId;
+    }
+
+    public PageRecord getWebPage() {
+        return webPage;
+    }
+
+    public void setWebPage(PageRecord webPage) {
+        this.webPage = webPage;
+    }
+
 
 }

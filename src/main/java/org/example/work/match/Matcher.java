@@ -8,9 +8,8 @@ import org.example.sql.pojo.IndexResult;
 import org.example.sql.pojo.InvertedIndex;
 import org.example.work.eigenword.EigenWord;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.net.URL;
+import java.util.*;
 
 /**
  * @Classname Matcher
@@ -21,6 +20,8 @@ import java.util.List;
 public class Matcher {
     private ConnectToMySql conn = new ConnectToMySql();
     private MatchMapper matchMapper = conn.getMatchMapper();
+
+    private Map<Integer,List<InvertedIndex>> candidate_words = new HashMap<>(); // Page_id -> words
 
     /**
      * 执行匹配。
@@ -35,7 +36,7 @@ public class Matcher {
         // 倒排索引，根据特征词获取出现该词的网页
         // 查询完成后统计每个网页包含目标特征词的个数，并过滤掉次数在阈值(目标特征词个数的一半)及以下的网页
         List<IndexResult> candidate = matchMapper.getCandidateSetByWords(wordsTarget, wordsTarget.size() > 2 ? wordsTarget.size() / 2 : null);
-
+        System.out.println("执行匹配...");
         MatchResult matchResult = new MatchResult();
         matchResult.setTarget(identifiedPage);
         if (candidate.size() == 0) { // 无匹配项目，
@@ -44,7 +45,7 @@ public class Matcher {
         }
         // 网页候选集按特征词数量排序
         Collections.sort(candidate);
-        candidate.removeIf(indexResult -> indexResult.getCount() < wordsTarget.size());
+        candidate.removeIf(indexResult -> indexResult.getCount() != wordsTarget.size());
         System.out.println("候选网页集大小 ：" + candidate.size());
         // 过滤候选网页集。
         filterByTargetWords(wordsTarget,candidate);
@@ -65,10 +66,16 @@ public class Matcher {
             matchResult.setWebPageId(target.getPageId());
         }
 
-        System.out.println("匹配详情 : " + fps.size() + " 个匹配项");
-        for (Fingerprint fp : fps) {
-            System.out.println(fp.toString());
-        }
+        System.out.println("Target: host-> " + identifiedPage.getHost() + ", path-> " + identifiedPage.getPath());
+        System.out.println("\n匹配详情");
+        System.out.println( "URL = "+matchMapper.selectUrlByPageID(target.getPageId()));
+        System.out.println(target.toString());
+
+//        System.out.println("匹配详情 : " + fps.size() + " 个匹配项");
+//        for (Fingerprint fp : fps) {
+//            System.out.println( "URL = "+matchMapper.selectUrlByPageID(fp.getPageId()));
+//            System.out.println(fp.toString());
+//        }
 
         return matchResult;
     }
@@ -79,7 +86,7 @@ public class Matcher {
      * @param candidate_page - 候选网页集
      */
     private void filterByTargetWords(List<Long> words_target, List<IndexResult> candidate_page) {
-        List<List<InvertedIndex>> candidate_words = new ArrayList<>(); // 候选集所有特征词列表，二维数组，D{p1，p2，，，} ，p{w1，w2，，，}
+        List<List<InvertedIndex>> target_contained_candidate_words = new ArrayList<>(); // 候选集所有特征词列表，二维数组，D{p1，p2，，，} ，p{w1，w2，，，}
         for (IndexResult indexResult : candidate_page) {
             int page_id = indexResult.getPageId();
             List<InvertedIndex> words = conn.getMatchMapper().selectFeatureWordsByPageID(page_id);
@@ -96,11 +103,12 @@ public class Matcher {
             // 将含有目标特征词的向量，按照索引大小重新排序，向量长度即为网页中含有目标特征词的数量。aj
 //            Collections.sort(result_words);
             // 加入网页候选集
-            candidate_words.add(result_words);
+            this.candidate_words.put(page_id,words);
+            target_contained_candidate_words.add(result_words);
         }
         // 对网页候选集中的网页求最长递增子序列，过滤阈值不符的网页集
-        for (int i = 0; i < candidate_words.size(); i++) {
-            List<InvertedIndex> page = candidate_words.get(i); // 对其提取最长递增子序列
+        for (int i = 0; i < target_contained_candidate_words.size(); i++) {
+            List<InvertedIndex> page = target_contained_candidate_words.get(i); // 对其提取最长递增子序列
             int[] tails = new int[page.size()];
             int length = 0; // 动态规划+二分查找
             for (InvertedIndex word : page) {
@@ -129,12 +137,12 @@ public class Matcher {
         List<List<InvertedIndex>> candidate_words = new ArrayList<>();
         for (IndexResult indexResult : candidate_page) {
             int page_id = indexResult.getPageId();
-            List<InvertedIndex> words = conn.getMatchMapper().selectFeatureWordsByPageID(page_id);
+            List<InvertedIndex> words = this.candidate_words.get(page_id);
             // sort by index
             Collections.sort(words);
             candidate_words.add(words);
         }
-        List<List<Double>> candidate_vectors = new ArrayList<>();
+        List<List<Double>> candidate_vectors = new ArrayList<>(); // 候选特征向量。
         List<List<InvertedIndex>> current_pages_words = new ArrayList<>(candidate_words);
         current_pages_words.add(target_words);
 
@@ -222,11 +230,11 @@ public class Matcher {
     }
 
     /**
-     * 获取网页指纹各部分指纹: [4bits tag][8bits length][content]
+     * 获取网页指纹各部分指纹: [4bits tag][12bits length][content]
      * @param fingerprint - 网页指纹
      * @return part of FP
      */
-    private List<ByteArray> getPartOfFingerprint(byte[] fingerprint) {
+    public List<ByteArray> getPartOfFingerprint(byte[] fingerprint) {
         List<ByteArray> result = new ArrayList<>();
         int index = 0;
         int count = 0;

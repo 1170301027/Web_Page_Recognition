@@ -7,16 +7,15 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.example.auxiliary.FilePath;
 import org.example.kit.FileKit;
+import org.example.kit.entity.ByteArray;
 import org.example.sql.mapper.MatchMapper;
 import org.example.sql.pojo.*;
-import org.example.work.main.MyThread;
+import org.example.work.main.ThreadToCrawlPages;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -108,7 +107,7 @@ public class MyBatisTest {
         List<JSONObject> jsonList = new ArrayList<>();
         String filePath = FilePath.ROOT_PATH + "index2.data";
         FileKit.readPacket(jsonList,filePath,0,1);
-        MyThread test = new MyThread();
+        ThreadToCrawlPages test = new ThreadToCrawlPages();
         JSONObject jo = jsonList.get(0);
         String url = jo.getString("url");
         byte[] data = new byte[0];
@@ -120,21 +119,14 @@ public class MyBatisTest {
 
     @Test
     public void buildFpAndWordsLib_new() {
-        MyThread myThread = new MyThread();
+        ThreadToCrawlPages myThread = new ThreadToCrawlPages();
         myThread.buildFpAndWordsLib_new();
-    }
-
-    @Test
-    public void storeURL() {
-        String filePath = FilePath.ROOT_PATH + "index3.data"; // 读取源文件
-        int start_line = 0; // 上一次读到行数
-        FileKit.readPacket2(filePath,start_line);
     }
 
 
     @Test
     public void buildIptoHostLib() {
-        MyThread myThread = new MyThread();
+        ThreadToCrawlPages myThread = new ThreadToCrawlPages();
         myThread.buildIpAndHostLib();
     }
 
@@ -158,5 +150,46 @@ public class MyBatisTest {
         for (InvertedIndex invertedIndex : result) {
             System.out.println(invertedIndex.toString());
         }
+    }
+
+
+    @Test
+    public void ReadAndPrintFp() {
+        List<Fingerprint> fingerprints = matchMapper.selectFingerprint();
+        List<Integer> page_ids = new ArrayList<>();
+        for (Fingerprint fingerprint : fingerprints) {
+            if (fingerprint.getFpdata().length < 100) {
+                String url = matchMapper.selectUrlByPageID(fingerprint.getPageId());
+                byte[] fp = fingerprint.getFpdata();
+                int index = 0;
+                int count = 0;
+                boolean flag = false;
+                while (count < 3 && index < fp.length)  {
+                    count ++;
+
+                    byte first_byte = fp[index];
+                    byte second_byte = fp[index+1];
+                    int length = ((first_byte & 0x0F) << 8) + (second_byte & 0xFF);
+                    int begin = index + 2;
+                    int end = index + length + 2;
+                    index = end;
+                    if (length == 0) {
+                        flag = true;
+                    }
+                }
+
+                if (flag || count < 3) {
+                    for (byte b : fingerprint.getFpdata()) {
+                        System.out.printf("%02x ", b);
+                    }
+                    System.out.println();
+                    System.out.println("URL : " + url);
+                    page_ids.add(fingerprint.getPageId());
+                }
+            }
+        }
+        System.out.println(page_ids.size());
+        System.out.println(page_ids);
+
     }
 }

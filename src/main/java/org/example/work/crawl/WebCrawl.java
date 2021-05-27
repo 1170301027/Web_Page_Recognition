@@ -74,7 +74,28 @@ public class WebCrawl {
 //            conn.setRequestProperty("User-Agent", "Chrome/73.0.3683.103 Mozilla/5.0");
             conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
             conn.setRequestProperty("Connection", "keep-alive");
+//            for (String s : conn.getRequestProperties().keySet()) {
+//                if (s != null) {
+//                    System.out.print(s);
+//                    System.out.print(":");
+//                }
+//                for (String s1 : conn.getRequestProperties().get(s)) {
+//                    System.out.print(s1+" ");
+//                }
+//                System.out.println();
+//            }
             conn.connect();
+            System.out.println();
+            for (String s : conn.getHeaderFields().keySet()) {
+                if (s != null) {
+                    System.out.print(s);
+                    System.out.print(":");
+                }
+                for (String s1 : conn.getHeaderFields().get(s)) {
+                    System.out.print(s1+" ");
+                }
+                System.out.println();
+            }
             if(conn.getResponseCode() == 200){ //响应码 200
                 List<String> headers = new ArrayList<>();
                 headers.add(conn.getHeaderField(0)); // 返回服务器的状态行,非键值对

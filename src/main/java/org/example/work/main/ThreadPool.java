@@ -5,13 +5,10 @@ import org.example.kit.FileKit;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @Classname ThreadPool
@@ -22,7 +19,7 @@ import java.util.concurrent.Executors;
 public class ThreadPool {
     private int current_thread_pool_size; // 当前线程池的大小，判断是否可以新建线程
     private final int threshold; // 线程池的阈值
-    private Set<MyThread> threads = new CopyOnWriteArraySet<>();
+    private Set<ThreadToCrawlPages> threads = new CopyOnWriteArraySet<>();
     private int serial_number = 0;
     private ExecutorService cache;
 
@@ -58,7 +55,7 @@ public class ThreadPool {
             while (count < threshold && serial_number < websites.size()) {
                 count++;
                 System.out.println("当前count : " + count  + ", 创建新线程 ： " + serial_number);
-                MyThread newThread = new MyThread(serial_number, websites.get(serial_number));
+                ThreadToCrawlPages newThread = new ThreadToCrawlPages(serial_number, websites.get(serial_number));
                 this.threads.add(newThread);
                 newThread.start();
                 serial_number++;
@@ -69,7 +66,7 @@ public class ThreadPool {
                 e.printStackTrace();
             }
             //检查活性
-            for (MyThread thread : threads) {
+            for (ThreadToCrawlPages thread : threads) {
                 if (!thread.isAlive()) {
                     count--;
                     threads.remove(thread);
@@ -102,12 +99,17 @@ public class ThreadPool {
                 e.printStackTrace();
             }
             //检查活性
-            for (MyThread thread : threads) {
+            for (ThreadToCrawlPages thread : threads) {
                 if (!thread.isAlive()) {
                     count--;
                     threads.remove(thread);
                 }
             }
         }
+    }
+
+    public static void main(String[] args) {
+        ThreadPool threadPool = new ThreadPool(12);
+        threadPool.run_crawl_url_list();
     }
 }

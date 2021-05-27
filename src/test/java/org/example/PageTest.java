@@ -109,7 +109,7 @@ public class PageTest {
     @Test
     public void keywordTest() {
         {
-            String URL = "http://www.csdn.net/";
+            String URL = "http://www.hit.edu.cn/";
             Document document = WebCrawl.webCrawl(URL);
             Queue<Element> queue = new LinkedList<>();
 //            System.out.println(document.html());

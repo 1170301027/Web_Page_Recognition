@@ -30,7 +30,7 @@ public class Before {
     private ByteArray html_source;
     private long gziptime;
     private final ByteArray CONTENT_ENCODING;
-    private int max_parse_depth;
+    private int max_parse_depth = 0;
     private String url;
     private ConnectToMySql sql;
 
@@ -74,6 +74,15 @@ public class Before {
         this.sql = new ConnectToMySql();
     }
 
+    public Before(ByteArray html_source, String url, ByteArray content_encoding,int max_parse_depth) {
+        this.html_source = html_source;
+        this.url = url;
+        this.CONTENT_ENCODING = content_encoding;
+        this.max_parse_depth = max_parse_depth;
+        parseHTML();
+        this.sql = new ConnectToMySql();
+    }
+
     public String getUrl() {
         return url;
     }
@@ -86,6 +95,12 @@ public class Before {
         if (this.CONTENT_ENCODING != null) handleContentEncoding(this.CONTENT_ENCODING);
         html_source.handleUnicodeIdentifier();
         parser = new Parser(html_source);
+
+        if (this.max_parse_depth != 0 && this.max_parse_depth > 0) {
+            parser.setMaxParsingDepth(this.max_parse_depth);
+        }
+//        System.out.println("current M :" + parser.getMaxParsingDepth());
+//        System.out.print(parser.getMaxParsingDepth());
 
         parser.addAction("a", hyper_links::add);
 

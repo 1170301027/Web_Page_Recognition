@@ -62,7 +62,7 @@ public class FileKit {
     }
 
     /**
-     * 响应报文以JSON格式写入文件
+     * 响应报文以JSON格式写入文件(误)
      * @param url 网页URL
      * @param data 响应报文数据
      */
@@ -92,6 +92,11 @@ public class FileKit {
 
     }
 
+    /**
+     * （误）
+     * @param content
+     * @param fileName
+     */
     public static void writeALineToFile(String content, String fileName) {
         File file = new File(fileName);
         try {
@@ -124,7 +129,7 @@ public class FileKit {
     }
 
     /**
-     * 从文件中读取数据，写入JSONObject
+     * 从文件中读取数据，写入JSONObject(误)
      * @param jsonList - JSON格式列表
      * @param filePath - 报文存储路径。
      * @param startLine - 开始读取行号
@@ -163,6 +168,12 @@ public class FileKit {
         return count;
     }
 
+    /**
+     * （误）
+     * @param filePath
+     * @param startLine
+     * @return
+     */
     public static int readPacket2(String filePath, int startLine) {
         File file = new File(filePath);
         int count  = startLine;

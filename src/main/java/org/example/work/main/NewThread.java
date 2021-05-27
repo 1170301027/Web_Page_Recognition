@@ -6,7 +6,7 @@ package org.example.work.main;
  * @Date 2021/3/10 10:29
  * @Created by lenovo
  */
-public class NewThread extends MyThread{
+public class NewThread extends ThreadToCrawlPages {
     private String url;
     private int serial;
     private int base = 1000500;

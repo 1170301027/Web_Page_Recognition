@@ -23,12 +23,14 @@ public class NewMatcher extends Matcher{
     private static final List<PageRecord> pages = new ArrayList<>();
 
     static  {
+        System.out.println("Sort words");
         ALL_WORDS.sort(Comparator.comparingInt(InvertedIndex::getPageId));
+        System.out.println("Sort fingerprint");
         ALL_FINGERPRINTS.sort(Comparator.comparingInt(Fingerprint::getPageId));
         Collections.sort(ALL_FINGERPRINTS);
         for (int i = 0; i < ALL_FINGERPRINTS.size(); i++) {
+            int page_id = ALL_FINGERPRINTS.get(i).getPageId();
             for (int j = 0; j < ALL_WORDS.size(); j++) {
-                int page_id = ALL_FINGERPRINTS.get(i).getPageId();
                 List<InvertedIndex> words = new ArrayList<>();
                 if (ALL_WORDS.get(j).getPageId() != page_id) {
                     PageRecord pageRecord = new PageRecord();
@@ -49,5 +51,26 @@ public class NewMatcher extends Matcher{
     @Override
     public MatchResult match(MatchTask identifiedPage) {
         return null;
+    }
+
+    public static void main(String[] args) {
+        NewMatcher newMatcher = new NewMatcher();
+        MatchTask matchTask = new MatchTask();
+        matchTask.setHost("voetbalvlaanderen.be");
+//        matchTask.setPath("/hotels-disneyland-paris/");
+        Extract.crawl(matchTask);
+        Matcher matcher = new Matcher();
+        MatchResult matchResult = newMatcher.match(matchTask);
+        if (matchResult == null) {
+            System.out.println("shibai ");
+            return;
+        }
+        System.out.println("match result : " + matchResult.isSuccess());
+        if (matchResult.isSuccess()) {
+            System.out.println("Page id : " + matchResult.getWebPageId());
+            ConnectToMySql conn = new ConnectToMySql();
+            String url = conn.getMatchMapper().selectUrlByPageID(matchResult.getWebPageId());
+            System.out.println("query result : " + url);
+        }
     }
 }

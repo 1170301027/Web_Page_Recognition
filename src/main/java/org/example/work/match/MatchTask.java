@@ -31,7 +31,7 @@ public class MatchTask {
     private ByteArray requestPacket;
     private ByteArray responsePacket;
 
-    private String path;
+    private String path = "/";
     private String host;
     private byte[] fingerprint;
     private List<InvertedIndex> eigenWords;

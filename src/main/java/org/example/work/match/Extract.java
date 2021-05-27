@@ -3,21 +3,17 @@ package org.example.work.match;
 import org.example.kit.entity.BiSupplier;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
-import org.example.sql.pojo.Fingerprint;
 import org.example.sql.pojo.InvertedIndex;
-import org.example.sql.pojo.PagetoUrl;
 import org.example.work.crawl.WebCrawl;
 import org.example.work.eigenword.EigenWord;
 import org.example.work.eigenword.ExtractEigenWord;
 import org.example.work.fingerprint.ExtractFingerprint;
 import org.example.work.main.Before;
-import org.example.work.match.MatchTask;
 import org.example.work.parse.nodes.Document;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,17 +66,17 @@ public class Extract {
             System.out.printf("%02x ",b);
         }
         System.out.println();
+        System.out.println("fingerprint size :" + fingerprint.size() );
         System.out.println("words size : " + vector.size());
         List<InvertedIndex> words = new ArrayList<>();
 
         for (EigenWord eigenWord : vector) {
-//            System.out.printf(" %x , %d\n",eigenWord.getWord(), eigenWord.getFrequency());
+            System.out.printf(" %x , %d\n",eigenWord.getWord(), eigenWord.getFrequency());
             InvertedIndex invertedIndex = new InvertedIndex();
             invertedIndex.setWord(eigenWord.getWord());
             invertedIndex.setFrequency(eigenWord.getFrequency());
             invertedIndex.setIndex(eigenWord.getIndex());
             words.add(invertedIndex);
-            System.out.println(invertedIndex.toString());
         }
 
 //        Fingerprint fp = new Fingerprint();

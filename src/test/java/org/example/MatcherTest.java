@@ -3,6 +3,7 @@ package org.example;
 import org.example.auxiliary.FilePath;
 import org.example.kit.FileKit;
 import org.example.sql.conn.ConnectToMySql;
+import org.example.sql.pojo.Fingerprint;
 import org.example.work.match.Extract;
 import org.example.work.match.MatchResult;
 import org.example.work.match.MatchTask;
@@ -13,6 +14,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @CLassname MatcherTest
@@ -24,7 +26,7 @@ public class MatcherTest {
     @Test
     public void testMatcher() {
         MatchTask matchTask = new MatchTask();
-        matchTask.setHost("voetbalvlaanderen.be");
+        matchTask.setHost("flightmedia.co");
 //        matchTask.setPath("/hotels-disneyland-paris/");
         Extract.crawl(matchTask);
         Matcher matcher = new Matcher();
