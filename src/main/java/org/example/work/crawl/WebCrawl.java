@@ -1,7 +1,7 @@
 package org.example.work.crawl;
 
 
-import org.example.auxiliary.FilePath;
+import org.example.uitl.FilePath;
 import org.example.kit.FileKit;
 import org.example.kit.StreamKit;
 import org.example.kit.entity.BiSupplier;
@@ -13,9 +13,7 @@ import org.jsoup.nodes.Document;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.Authenticator;
 import java.net.HttpURLConnection;
-import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;

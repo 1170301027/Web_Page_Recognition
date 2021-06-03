@@ -1,8 +1,4 @@
-package org.example.auxiliary;
-
-import org.example.kit.entity.MiniStr;
-
-import java.util.Map;
+package org.example.uitl;
 
 /**
  * @Classname Keys

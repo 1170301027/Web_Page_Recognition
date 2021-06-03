@@ -1,7 +1,7 @@
 package org.example.result;
 
-import org.example.sql.pojo.Fingerprint;
-import org.example.sql.pojo.InvertedIndex;
+import org.example.sql.model.Fingerprint;
+import org.example.sql.model.InvertedIndex;
 
 import java.util.List;
 

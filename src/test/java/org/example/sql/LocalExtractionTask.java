@@ -1,11 +1,11 @@
-package org.example;
+package org.example.sql;
 
-import org.example.auxiliary.FilePath;
+import org.example.uitl.FilePath;
 import org.example.kit.FileKit;
 import org.example.kit.entity.BiSupplier;
 import org.example.kit.entity.ByteArray;
-import org.example.sql.pojo.Fingerprint;
-import org.example.sql.pojo.InvertedIndex;
+import org.example.sql.model.Fingerprint;
+import org.example.sql.model.InvertedIndex;
 import org.example.work.eigenword.EigenWord;
 
 import java.io.File;

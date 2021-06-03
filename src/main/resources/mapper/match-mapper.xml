@@ -11,6 +11,12 @@
         <if test="threshold != null">) t where `count` > #{threshold}</if>
     </select>
 
+    <select id="selectFeatureWordsCount" resultType="IndexResult" useCache="false" flushCache="true">
+        select page_id,count(word) `count`
+        from inverted_index word
+        group by page_id;
+    </select>
+
     <select id="selectFeatureWordsByPageID" parameterType="int" resultType="InvertedIndex" useCache="false" flushCache="true">
         select * from inverted_index where page_id = #{page_id}
     </select>
@@ -33,6 +39,10 @@
 
     <select id="selectUrlByPageID" resultType="java.lang.String" useCache="false" flushCache="true">
         select url from page_url where page_id = #{id}
+    </select>
+
+    <select id="selectAllPagetoUrl" resultType="PagetoUrl">
+        select * from page_url
     </select>
 
     <select id="selectFingerprint" resultType="Fingerprint" useCache="false" flushCache="true">
@@ -68,4 +78,22 @@
             (#{s.pageId},#{s.url})
         </foreach>
     </insert>
+    
+    <delete id="deleteFpById">
+        delete
+        from fingerprint
+        where page_id = #{page_id};
+    </delete>
+
+    <delete id="deleteFeatureWordById">
+        delete
+        from inverted_index
+        where page_id = #{page_id};
+    </delete>
+
+    <delete id="deletePagetoUrlById">
+        delete
+        from page_url
+        where page_id = #{page_id};
+    </delete>
 </mapper>

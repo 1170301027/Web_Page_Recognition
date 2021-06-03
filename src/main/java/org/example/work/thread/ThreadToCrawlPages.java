@@ -1,17 +1,16 @@
-package org.example.work.main;
+package org.example.work.thread;
 
 import net.sf.json.JSONObject;
-import org.example.auxiliary.FilePath;
+import org.example.uitl.FilePath;
 import org.example.kit.FileKit;
 import org.example.kit.entity.BiSupplier;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
 import org.example.sql.conn.ConnectToMySql;
-import org.example.sql.mapper.MatchMapper;
-import org.example.sql.pojo.Fingerprint;
-import org.example.sql.pojo.InvertedIndex;
-import org.example.sql.pojo.IptoHost;
-import org.example.sql.pojo.PagetoUrl;
+import org.example.sql.model.Fingerprint;
+import org.example.sql.model.InvertedIndex;
+import org.example.sql.model.IptoHost;
+import org.example.sql.model.PagetoUrl;
 import org.example.work.crawl.WebCrawl;
 import org.example.work.eigenword.EigenWord;
 import org.example.work.eigenword.ExtractEigenWord;

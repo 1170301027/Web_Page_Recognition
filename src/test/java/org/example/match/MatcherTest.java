@@ -1,9 +1,8 @@
-package org.example;
+package org.example.match;
 
-import org.example.auxiliary.FilePath;
+import org.example.uitl.FilePath;
 import org.example.kit.FileKit;
 import org.example.sql.conn.ConnectToMySql;
-import org.example.sql.pojo.Fingerprint;
 import org.example.work.match.Extract;
 import org.example.work.match.MatchResult;
 import org.example.work.match.MatchTask;
@@ -13,8 +12,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @CLassname MatcherTest

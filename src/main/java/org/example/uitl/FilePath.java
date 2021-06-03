@@ -1,4 +1,4 @@
-package org.example.auxiliary;
+package org.example.uitl;
 
 /**
  * @Classname FilePath

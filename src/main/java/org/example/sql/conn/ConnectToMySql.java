@@ -5,10 +5,10 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.example.sql.mapper.MatchMapper;
-import org.example.sql.pojo.Fingerprint;
-import org.example.sql.pojo.InvertedIndex;
-import org.example.sql.pojo.IptoHost;
-import org.example.sql.pojo.PagetoUrl;
+import org.example.sql.model.Fingerprint;
+import org.example.sql.model.InvertedIndex;
+import org.example.sql.model.IptoHost;
+import org.example.sql.model.PagetoUrl;
 
 import java.io.IOException;
 import java.io.InputStream;

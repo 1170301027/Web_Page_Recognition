@@ -3,7 +3,7 @@ package org.example.work.eigenword;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
 import org.example.kit.security.MD5;
-import org.example.work.main.Before;
+import org.example.work.thread.Before;
 import org.example.work.parse.Tag;
 import org.example.work.parse.nodes.Element;
 import org.example.work.parse.nodes.Node;

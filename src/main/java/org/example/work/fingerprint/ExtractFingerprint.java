@@ -1,6 +1,6 @@
 package org.example.work.fingerprint;
 
-import org.example.auxiliary.Keys;
+import org.example.uitl.Keys;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
 import org.example.work.eigenword.EigenWord;

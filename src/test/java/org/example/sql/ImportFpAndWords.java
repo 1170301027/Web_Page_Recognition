@@ -1,14 +1,14 @@
-package org.example;
+package org.example.sql;
 
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.example.auxiliary.FilePath;
+import org.example.uitl.FilePath;
 import org.example.kit.FileKit;
 import org.example.sql.mapper.MatchMapper;
-import org.example.sql.pojo.Fingerprint;
-import org.example.sql.pojo.InvertedIndex;
+import org.example.sql.model.Fingerprint;
+import org.example.sql.model.InvertedIndex;
 import org.junit.Before;
 import org.junit.Test;
 

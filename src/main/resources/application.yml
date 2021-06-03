@@ -1,6 +1,6 @@
 
 server:
-  port: 8201
+  port: 8080
  
 spring:
   datasource:
@@ -12,6 +12,13 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 200MB
+  thymeleaf:
+    prefix:classpath:/templates/
+    suffix:.html
+    mode:HTML5
+    encoding:UTF-8
+    content-type:text/html
+    cache:false
 
 #showSql
 logging:

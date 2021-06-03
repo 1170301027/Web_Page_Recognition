@@ -3,12 +3,12 @@ package org.example.work.match;
 import org.example.kit.entity.BiSupplier;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
-import org.example.sql.pojo.InvertedIndex;
+import org.example.sql.model.InvertedIndex;
 import org.example.work.crawl.WebCrawl;
 import org.example.work.eigenword.EigenWord;
 import org.example.work.eigenword.ExtractEigenWord;
 import org.example.work.fingerprint.ExtractFingerprint;
-import org.example.work.main.Before;
+import org.example.work.thread.Before;
 import org.example.work.parse.nodes.Document;
 import org.springframework.util.Assert;
 

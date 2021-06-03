@@ -1,9 +1,8 @@
 package org.example.work.match;
 
-import org.aspectj.lang.annotation.Before;
 import org.example.sql.conn.ConnectToMySql;
-import org.example.sql.pojo.Fingerprint;
-import org.example.sql.pojo.InvertedIndex;
+import org.example.sql.model.Fingerprint;
+import org.example.sql.model.InvertedIndex;
 
 import java.util.ArrayList;
 import java.util.Collections;

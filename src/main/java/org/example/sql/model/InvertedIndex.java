@@ -1,14 +1,10 @@
-package org.example.sql.pojo;
-
-
-import org.example.sql.annotation.Table;
+package org.example.sql.model;
 
 import java.io.Serializable;
 
 /**
  * 倒排索引，
  */
-@Table
 public class InvertedIndex implements Serializable , Comparable<InvertedIndex>{
 
     private static final long serialVersionUID = -1L;

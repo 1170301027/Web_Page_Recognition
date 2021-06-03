@@ -1,12 +1,12 @@
-package org.example;
+package org.example.parser;
 
 import org.example.kit.entity.BiSupplier;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
 import org.example.work.crawl.WebCrawl;
 import org.example.work.fingerprint.ExtractFingerprint;
-import org.example.work.main.Before;
-import org.example.work.main.ThreadToCrawlPages;
+import org.example.work.thread.Before;
+import org.example.work.thread.ThreadToCrawlPages;
 import org.example.work.match.Extract;
 import org.example.work.match.MatchTask;
 import org.example.work.parse.Parser;

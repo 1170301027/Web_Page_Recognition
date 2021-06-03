@@ -3,12 +3,10 @@ package org.example.work.match;
 import org.example.kit.entity.ByteArray;
 import org.example.sql.conn.ConnectToMySql;
 import org.example.sql.mapper.MatchMapper;
-import org.example.sql.pojo.Fingerprint;
-import org.example.sql.pojo.IndexResult;
-import org.example.sql.pojo.InvertedIndex;
-import org.example.work.eigenword.EigenWord;
+import org.example.sql.model.Fingerprint;
+import org.example.sql.model.IndexResult;
+import org.example.sql.model.InvertedIndex;
 
-import java.net.URL;
 import java.util.*;
 
 /**

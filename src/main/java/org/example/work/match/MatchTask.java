@@ -1,8 +1,7 @@
 package org.example.work.match;
 
 import org.example.kit.entity.ByteArray;
-import org.example.sql.pojo.InvertedIndex;
-import org.example.work.eigenword.EigenWord;
+import org.example.sql.model.InvertedIndex;
 
 import java.util.Arrays;
 import java.util.List;

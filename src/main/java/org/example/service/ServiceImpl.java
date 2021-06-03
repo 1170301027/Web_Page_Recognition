@@ -1,15 +1,14 @@
 package org.example.service;
 
-import org.apache.ibatis.annotations.Result;
 import org.example.result.RestResult;
 import org.example.sql.conn.ConnectToMySql;
 import org.example.sql.mapper.MatchMapper;
-import org.example.sql.pojo.Fingerprint;
-import org.example.sql.pojo.InvertedIndex;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.example.sql.model.Fingerprint;
+import org.example.sql.model.InvertedIndex;
+import org.example.sql.model.PagetoUrl;
+import org.example.uitl.Util;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -35,4 +34,21 @@ public class ServiceImpl {
         rest.setWords(words);
         return rest;
     }
+
+
+    private List<PagetoUrl> ptous;
+    public void delete() {
+        ptous = this.matchMapper.selectAllPagetoUrl();
+        for (PagetoUrl pagetoUrl : ptous) {
+            String url = pagetoUrl.getUrl();
+            if(Util.urlHasPath(url)) {
+                System.out.println(url);
+                this.matchMapper.deletePagetoUrlById(pagetoUrl.getPageId());
+                this.matchMapper.deleteFpById(pagetoUrl.getPageId());
+                this.matchMapper.deleteFeatureWordById(pagetoUrl.getPageId());
+                ptous.remove(pagetoUrl);
+            }
+        }
+    }
+
 }

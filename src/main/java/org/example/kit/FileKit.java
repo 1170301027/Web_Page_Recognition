@@ -2,7 +2,7 @@ package org.example.kit;
 
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
-import org.example.auxiliary.FilePath;
+import org.example.uitl.FilePath;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -105,6 +105,7 @@ public class FileKit {
             }
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
             bw.write(content);
+            bw.write("\r\n");
             bw.close();
         } catch (FileNotFoundException e) {
             System.out.println("写入文件失败");

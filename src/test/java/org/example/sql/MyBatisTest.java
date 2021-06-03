@@ -1,16 +1,15 @@
-package org.example;
+package org.example.sql;
 
 import net.sf.json.JSONObject;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.example.auxiliary.FilePath;
+import org.example.uitl.FilePath;
 import org.example.kit.FileKit;
-import org.example.kit.entity.ByteArray;
 import org.example.sql.mapper.MatchMapper;
-import org.example.sql.pojo.*;
-import org.example.work.main.ThreadToCrawlPages;
+import org.example.sql.model.*;
+import org.example.work.thread.ThreadToCrawlPages;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +26,7 @@ import java.util.List;
  * @Date 2020/11/15 11:38
  * @Created by shuaif
  */
-public class MyBatisTest {
+public class  MyBatisTest {
     private InputStream in ;
     private SqlSessionFactory factory;
     private SqlSession session;
@@ -191,5 +190,12 @@ public class MyBatisTest {
         System.out.println(page_ids.size());
         System.out.println(page_ids);
 
+    }
+
+    @Test
+    public void deleteById(){
+        int page_id = 0;
+        this.matchMapper.deleteFpById(page_id);
+        this.matchMapper.deleteFeatureWordById(page_id);
     }
 }

@@ -1,4 +1,4 @@
-package org.example.sql.pojo;
+package org.example.sql.model;
 
 /**
  * @Classname IptoHost

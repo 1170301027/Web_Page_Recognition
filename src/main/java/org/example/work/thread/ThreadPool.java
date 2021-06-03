@@ -1,6 +1,6 @@
-package org.example.work.main;
+package org.example.work.thread;
 
-import org.example.auxiliary.FilePath;
+import org.example.uitl.FilePath;
 import org.example.kit.FileKit;
 
 import java.io.IOException;
@@ -80,10 +80,10 @@ public class ThreadPool {
 
 
     public void run_crawl_url_list() {
-        List<String> urls = doParse(FilePath.URL_LIST);
+        List<String> urls = doParse(FilePath.ALL_WEBSITE);
         System.out.println("完成读取url数据 :" + urls.size());
         int count = 0;
-        serial_number = 689147;// 12500
+        serial_number = 0;//
         while (serial_number < urls.size()) {
             while (count < threshold && serial_number < urls.size()) {
                 count++;
@@ -109,7 +109,7 @@ public class ThreadPool {
     }
 
     public static void main(String[] args) {
-        ThreadPool threadPool = new ThreadPool(12);
+        ThreadPool threadPool = new ThreadPool(20);
         threadPool.run_crawl_url_list();
     }
 }

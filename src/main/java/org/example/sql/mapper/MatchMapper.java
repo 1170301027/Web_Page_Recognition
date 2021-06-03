@@ -1,12 +1,10 @@
 package org.example.sql.mapper;
 
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.example.sql.pojo.*;
-import org.example.work.eigenword.EigenWord;
+import org.example.sql.model.*;
 
 import java.util.List;
-public interface MatchMapper extends BaseMapper {
+public interface MatchMapper {
 
     List<IndexResult> getCandidateSetByWords(@Param("list") List<Long> words, @Param("threshold") Integer threshold);
 
@@ -19,6 +17,8 @@ public interface MatchMapper extends BaseMapper {
     String selectHostByIp(@Param("ip") String ip);
 
     String selectUrlByPageID(@Param("id") int pageId);
+
+    List<PagetoUrl> selectAllPagetoUrl();
 
     void insertFingerprints(@Param("list") List<Fingerprint> fps);
 
@@ -33,5 +33,12 @@ public interface MatchMapper extends BaseMapper {
 
     List<InvertedIndex> selectFeatureWords();
 
+    void deleteFpById(int page_id);
 
+    void deleteFeatureWordById(int page_id);
+
+    void deletePagetoUrlById(int page_id);
+
+    // 统计
+    List<IndexResult> selectFeatureWordsCount();
 }

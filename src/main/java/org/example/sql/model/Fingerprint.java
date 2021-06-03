@@ -1,14 +1,10 @@
-package org.example.sql.pojo;
+package org.example.sql.model;
 
 
-import org.example.sql.annotation.Pk;
-import org.example.sql.annotation.Table;
-import org.example.sql.annotation.Transient;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
 
-@Table
 public class Fingerprint implements Comparable<Fingerprint> {
 
     private Integer pageId;
@@ -17,7 +13,6 @@ public class Fingerprint implements Comparable<Fingerprint> {
 
     private double similarity;
 
-    @Pk
     public Integer getPageId(){
         return pageId;
     }
@@ -36,7 +31,7 @@ public class Fingerprint implements Comparable<Fingerprint> {
     public void setLastUpdate(Timestamp lastUpdate){
         this.lastUpdate = lastUpdate;
     }
-    @Transient
+
     public double getSimilarity(){
         return similarity;
     }

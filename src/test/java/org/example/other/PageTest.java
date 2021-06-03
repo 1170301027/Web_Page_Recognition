@@ -1,4 +1,4 @@
-package org.example;
+package org.example.other;
 
 import org.example.work.crawl.WebCrawl;
 import org.jsoup.Jsoup;

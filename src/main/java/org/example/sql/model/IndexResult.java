@@ -1,4 +1,4 @@
-package org.example.sql.pojo;
+package org.example.sql.model;
 
 public class IndexResult implements Comparable<IndexResult> {
     private int pageId;
