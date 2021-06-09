@@ -96,7 +96,7 @@ public class Extract {
         if (matchTask.getHost() != null)
             url = "https://" + matchTask.getHost();
         if (url != null)
-            if (matchTask.getPath() != null) url += matchTask.getPath();
+            if (matchTask.getPath() != null) url += "/" + matchTask.getPath();
             else url += "/";
         else {
             System.out.println("目标网页URL未知。");

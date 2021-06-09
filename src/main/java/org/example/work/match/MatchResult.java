@@ -10,6 +10,7 @@ package org.example.work.match;
 public class MatchResult {
     private MatchTask target;
     private boolean success;
+    private double sim;
 
     private int webPageId; // 识别成功网页ID
     private PageRecord webPage;
@@ -49,5 +50,11 @@ public class MatchResult {
         this.webPage = webPage;
     }
 
+    public double getSim() {
+        return sim;
+    }
 
+    public void setSim(double sim) {
+        this.sim = sim;
+    }
 }

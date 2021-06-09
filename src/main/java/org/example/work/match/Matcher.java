@@ -62,6 +62,7 @@ public class Matcher {
         if(target.getSimilarity() > 0.80){ // 阈值
             matchResult.setSuccess(true);
             matchResult.setWebPageId(target.getPageId());
+            matchResult.setSim(target.getSimilarity());
         }
 
         System.out.println("Target: host-> " + identifiedPage.getHost() + ", path-> " + identifiedPage.getPath());
@@ -87,7 +88,7 @@ public class Matcher {
         List<List<InvertedIndex>> target_contained_candidate_words = new ArrayList<>(); // 候选集所有特征词列表，二维数组，D{p1，p2，，，} ，p{w1，w2，，，}
         for (IndexResult indexResult : candidate_page) {
             int page_id = indexResult.getPageId();
-            List<InvertedIndex> words = conn.getMatchMapper().selectFeatureWordsByPageID(page_id);
+            List<InvertedIndex> words = matchMapper.selectFeatureWordsByPageID(page_id);
             // 根据目标特征词对候选网页集中的向量进行排序
             List<InvertedIndex> result_words = new ArrayList<>();
             for (Long target_word : words_target) {

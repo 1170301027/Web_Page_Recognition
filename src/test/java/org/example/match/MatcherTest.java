@@ -23,7 +23,7 @@ public class MatcherTest {
     @Test
     public void testMatcher() {
         MatchTask matchTask = new MatchTask();
-        matchTask.setHost("flightmedia.co");
+        matchTask.setHost("jpg2pdf.org");
 //        matchTask.setPath("/hotels-disneyland-paris/");
         Extract.crawl(matchTask);
         Matcher matcher = new Matcher();

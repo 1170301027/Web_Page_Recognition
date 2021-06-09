@@ -45,6 +45,12 @@
         select * from page_url
     </select>
 
+    <select id="selectWebsiteByName" resultType="Website">
+        select *
+        from website
+        where name = #{name}
+    </select>
+
     <select id="selectFingerprint" resultType="Fingerprint" useCache="false" flushCache="true">
         select * from fingerprint
     </select>
@@ -77,6 +83,18 @@
         <foreach collection="list" item="s" separator=",">
             (#{s.pageId},#{s.url})
         </foreach>
+    </insert>
+
+    <insert id="insertWebsite">
+        INSERT INTO website (id,name) VALUES
+        <foreach collection="list" item="s" separator=",">
+            (#{s.id},#{s.name})
+        </foreach>
+    </insert>
+
+    <insert id="insertOneWebsite">
+        insert into website (id, name)
+        values (#{id},#{name});
     </insert>
     
     <delete id="deleteFpById">

@@ -20,6 +20,8 @@ public interface MatchMapper {
 
     List<PagetoUrl> selectAllPagetoUrl();
 
+    Website selectWebsiteByName(String name);
+
     void insertFingerprints(@Param("list") List<Fingerprint> fps);
 
     void insertFeatureWords(@Param("list") List<InvertedIndex> fps);
@@ -27,6 +29,10 @@ public interface MatchMapper {
     void insertIptoHost(IptoHost iptoHost);
 
     void insertPagetoUrl(@Param("list") List<PagetoUrl> pagetoUrls);
+
+    void insertWebsite(@Param("list") List<Website> websites);
+
+    void insertOneWebsite(Website website);
 
     // 一次读入内存
     List<Fingerprint> selectFingerprint();

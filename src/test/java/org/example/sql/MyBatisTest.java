@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -197,5 +198,28 @@ public class  MyBatisTest {
         int page_id = 0;
         this.matchMapper.deleteFpById(page_id);
         this.matchMapper.deleteFeatureWordById(page_id);
+    }
+
+    @Test
+    public void insertHost() {
+        String filepath = FilePath.ALL_WEBSITE;
+        List<String> result = new ArrayList<>();
+        try {
+            List<String> all_lines = FileKit.getAllLines(filepath);
+            for (String line : all_lines) {
+                result.add(line.split(",")[1]);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        List<Website> websites = new ArrayList<>();
+        for (String s : result) {
+            Website website = new Website();
+            website.setName(s);
+            this.matchMapper.insertOneWebsite(website);
+            websites.add(website);
+        }
+//        this.matchMapper.insertWebsite(websites);
+
     }
 }
