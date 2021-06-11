@@ -54,6 +54,7 @@ public class MatcherController {
             if (website !=null) {
                 System.out.println(website.getId());
                 model.addAttribute("valid","True");
+                model.addAttribute("host_id",website.getId());
             } else {
                 model.addAttribute("valid","False");
             }
@@ -78,7 +79,7 @@ public class MatcherController {
     }
 
     @RequestMapping("/match")
-    public String match(@RequestParam("file") MultipartFile file, @RequestParam("url") String target_url, Model model){
+    public String match( @RequestParam("url") String target_url, Model model){
         if (target_url.isEmpty()) {
             model.addAttribute("message", "url is empty!");
             return "/result";
@@ -91,20 +92,22 @@ public class MatcherController {
             Matcher matcher = new Matcher();
             MatchResult matchResult = matcher.match(matchTask);
             System.out.println("match result : " + matchResult.isSuccess());
+            model.addAttribute("target_url",target_url);
+            ConnectToMySql conn = new ConnectToMySql();
+            System.out.println("Page id : " + matchResult.getPage_id());
+            String url = conn.getMatchMapper().selectUrlByPageID(matchResult.getPage_id());
+            System.out.println("query result : " + url);
+            String host = Util.getHost(url);
             if (matchResult.isSuccess()) {
-                System.out.println("Page id : " + matchResult.getWebPageId());
-                ConnectToMySql conn = new ConnectToMySql();
-                String url = conn.getMatchMapper().selectUrlByPageID(matchResult.getWebPageId());
-                System.out.println("query result : " + url);
-                String host = Util.getHost(url);
                 if (matchTask.getHost().equals(host)) {
                     model.addAttribute("message", "success");
-                    model.addAttribute("target_url",target_url);
-                    model.addAttribute("url", url);
-                    model.addAttribute("page_id",matchResult.getWebPageId());
-                    model.addAttribute("sim",matchResult.getSim());
                 }
+            } else {
+                model.addAttribute("message",false);
             }
+            model.addAttribute("url", url);
+            model.addAttribute("page_id",matchResult.getPage_id());
+            model.addAttribute("sim",matchResult.getSim());
         }catch (Exception e){
             e.printStackTrace();
             model.addAttribute("message","fail");

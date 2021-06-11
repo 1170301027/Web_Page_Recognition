@@ -96,6 +96,11 @@
         insert into website (id, name)
         values (#{id},#{name});
     </insert>
+
+    <insert id="insertMatchResult">
+        insert into match_result (id, success, sim, page_id)
+        values (#{id},#{success},#{sim},#{page_id});
+    </insert>
     
     <delete id="deleteFpById">
         delete

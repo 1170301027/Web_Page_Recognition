@@ -35,8 +35,8 @@ public class WebCrawl {
      */
     public static BiSupplier<URL,byte[]> getHttpPacketLoadedWithHTML(String httpURL) throws IOException{
         // 系统代理
-        System.setProperty("http.proxyHost","127.0.0.1");
-        System.setProperty("http.proxyPort","10809");
+//        System.setProperty("http.proxyHost","127.0.0.1");
+//        System.setProperty("http.proxyPort","10809");
 //        System.setProperty("socksProxyHost", "127.0.0.1");
 //        System.setProperty("socksProxyPort", "1081");
 //        class MyAuthenticator extends Authenticator {

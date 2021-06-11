@@ -280,32 +280,6 @@ public class Parser {
         }
     }
 
-//    // 深度大于 MAX_PARSING_DEPTH 时，只进行解析，不创建元素
-//    private String parse(String parent){
-//        while(true){
-//            buffer.moveToUnblankChar();
-//            if(buffer.get() != TAG_START_FLAG){ // 文本节点
-//                buffer.moveTo(TAG_START_FLAG);
-//                continue;
-//            }
-//            String name = getTagName();
-//            if(name.charAt(0) == TAG_CLOSING_FLAG){
-//                buffer.moveAfter(TAG_END_FLAG);
-//                String tag = name.substring(1);
-//                if(tag.equals(parent)){
-//                    break;
-//                }else{
-//                    throw new IllegalArgumentException("错误的闭合标签：" + name);
-//                }
-//            }
-//            Tag tag = Tag.valueOf(name);
-//            buffer.moveAfter(TAG_END_FLAG);
-//            if(!tag.isEmpty())
-//                parse(name);
-//        }
-//        return null;
-//    }
-
     private String getTagName(){
         if(buffer.noNext(TAG_START_FLAG))
             return null;

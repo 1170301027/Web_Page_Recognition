@@ -9,6 +9,7 @@ import org.example.uitl.FilePath;
 import org.example.kit.FileKit;
 import org.example.sql.mapper.MatchMapper;
 import org.example.sql.model.*;
+import org.example.work.match.MatchResult;
 import org.example.work.thread.ThreadToCrawlPages;
 import org.junit.After;
 import org.junit.Before;
@@ -221,5 +222,23 @@ public class  MyBatisTest {
         }
 //        this.matchMapper.insertWebsite(websites);
 
+    }
+
+    @Test
+    public void selectFingerprint() {
+        Fingerprint fp = this.matchMapper.selectFingetprintByPageId(84);
+        System.out.println(fp.toString());
+//        for (byte fpdatum : fp.getFpdata()) {
+//            System.out.printf("%02x ",fpdatum);
+//        }
+    }
+
+    @Test
+    public void insertMatchResult(){
+        MatchResult matchResult = new MatchResult();
+        matchResult.setPage_id(84);
+        matchResult.setSuccess(true);
+        matchResult.setSim(0.94);
+        this.matchMapper.insertMatchResult(matchResult);
     }
 }

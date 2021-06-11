@@ -43,8 +43,11 @@ public class Matcher {
         }
         // 网页候选集按特征词数量排序
         Collections.sort(candidate);
-        candidate.removeIf(indexResult -> indexResult.getCount() != wordsTarget.size());
-        System.out.println("候选网页集大小 ：" + candidate.size());
+        for (IndexResult indexResult : candidate) {
+            System.out.println(indexResult.toString());
+        }
+//        candidate.removeIf(indexResult -> indexResult.getCount() < wordsTarget.size());
+//        System.out.println("候选网页集大小 ：" + candidate.size());
         // 过滤候选网页集。
         filterByTargetWords(wordsTarget,candidate);
         //根据特征向量筛选候选集
@@ -61,14 +64,17 @@ public class Matcher {
         Fingerprint target = fps.get(0);
         if(target.getSimilarity() > 0.80){ // 阈值
             matchResult.setSuccess(true);
-            matchResult.setWebPageId(target.getPageId());
-            matchResult.setSim(target.getSimilarity());
+        } else {
+            matchResult.setSuccess(false);
         }
+        matchResult.setPage_id(target.getPageId());
+        matchResult.setSim(target.getSimilarity());
 
         System.out.println("Target: host-> " + identifiedPage.getHost() + ", path-> " + identifiedPage.getPath());
         System.out.println("\n匹配详情");
         System.out.println( "URL = "+matchMapper.selectUrlByPageID(target.getPageId()));
-        System.out.println(target.toString());
+        System.out.println(target);
+        conn.insertMatchResult(matchResult);
 
 //        System.out.println("匹配详情 : " + fps.size() + " 个匹配项");
 //        for (Fingerprint fp : fps) {
@@ -105,6 +111,7 @@ public class Matcher {
             this.candidate_words.put(page_id,words);
             target_contained_candidate_words.add(result_words);
         }
+        List<Integer> rmlist = new ArrayList<>();
         // 对网页候选集中的网页求最长递增子序列，过滤阈值不符的网页集
         for (int i = 0; i < target_contained_candidate_words.size(); i++) {
             List<InvertedIndex> page = target_contained_candidate_words.get(i); // 对其提取最长递增子序列
@@ -122,7 +129,13 @@ public class Matcher {
             }
             // 限定阈值，排除明显不符合的网页，
             if (length < (3 * page.size()) / 4)
-                candidate_page.remove(i);
+                rmlist.add(i);
+        }
+        for (int i = rmlist.size() - 1; i  >= 0 ; i--) {
+            candidate_page.remove((int)(rmlist.get(i)));
+        }
+        for (IndexResult indexResult : candidate_page) {
+            System.out.println(indexResult.toString());
         }
     }
 
@@ -137,10 +150,12 @@ public class Matcher {
         for (IndexResult indexResult : candidate_page) {
             int page_id = indexResult.getPageId();
             List<InvertedIndex> words = this.candidate_words.get(page_id);
+            if (words.size() != target_words.size()) continue;
             // sort by index
             Collections.sort(words);
             candidate_words.add(words);
         }
+        System.out.println("candidate page size : "+candidate_words.size());
         List<List<Double>> candidate_vectors = new ArrayList<>(); // 候选特征向量。
         List<List<InvertedIndex>> current_pages_words = new ArrayList<>(candidate_words);
         current_pages_words.add(target_words);
@@ -168,11 +183,15 @@ public class Matcher {
             if (max_sim < sim) max_sim = sim;
             page_sims.add(sim);
         }
+        List<Integer> rmlist = new ArrayList<>();
         // 保留相似度最大的选项
         for (int i = 0; i < page_sims.size(); i++) {
             if (page_sims.get(i) < max_sim) {
-                candidate_page.remove(i);
+                rmlist.add(i);
             }
+        }
+        for (int i = rmlist.size() - 1; i  >= 0 ; i--) {
+            candidate_page.remove((int)(rmlist.get(i)));
         }
     }
 
@@ -297,7 +316,6 @@ public class Matcher {
             double sim = 0.5 * resp_head_sim + 0.3 * html_head_sim + 0.2 * html_body_sim;
             fp.setSimilarity(sim);
         }
-        Collections.sort(fps);
-        Collections.reverse(fps);
+        Collections.sort(fps); // 相似度从大到小排序
     }
 }

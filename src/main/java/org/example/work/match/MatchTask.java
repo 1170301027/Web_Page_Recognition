@@ -121,9 +121,17 @@ public class MatchTask {
 
     @Override
     public String toString() {
-        return "[ client ip : "+ Arrays.toString(clientIP) + "]\n" +
+        StringBuilder sip = new StringBuilder();
+        StringBuilder tip = new StringBuilder();
+        for (int i = 0,j = 0; i < this.clientIP.length && j < this.serverIP.length; i++,j++) {
+            sip.append(Integer.toHexString(clientIP[i] & 0xFF));
+            sip.append(" ");
+            tip.append(Integer.toHexString(serverIP[j] & 0xFF));
+            tip.append(" ");
+        }
+        return "[ client ip : "+ sip + "]\n" +
                 "[ client port : "+ clientPort + "]\n" +
-                "[ server ip : "+ Arrays.toString(serverIP) + "]\n" +
+                "[ server ip : "+ tip + "]\n" +
                 "[ server port : "+ serverPort + "]\n" +
                 "[ host : "+ host + "]\n" +
                 "[ path : "+ path + "]\n";

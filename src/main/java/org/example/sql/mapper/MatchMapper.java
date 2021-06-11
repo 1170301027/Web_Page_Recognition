@@ -1,7 +1,9 @@
 package org.example.sql.mapper;
 
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.example.sql.model.*;
+import org.example.work.match.MatchResult;
 
 import java.util.List;
 public interface MatchMapper {
@@ -33,6 +35,8 @@ public interface MatchMapper {
     void insertWebsite(@Param("list") List<Website> websites);
 
     void insertOneWebsite(Website website);
+
+    void insertMatchResult(MatchResult result);
 
     // 一次读入内存
     List<Fingerprint> selectFingerprint();

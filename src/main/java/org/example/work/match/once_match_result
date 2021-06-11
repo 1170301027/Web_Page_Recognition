@@ -1,0 +1,114 @@
+https://www.house365.com/
+
+Transfer-Encoding:chunked
+HTTP/1.1 200 OK
+Server:nginx
+Connection:keep-alive
+X-Download-Options:SAMEORIGIN
+X-Permitted-Cross-Domain-Policies:master-only
+Pragma:no-cache
+Date:Thu, 10 Jun 2021 01:35:43 GMT
+X-Frame-Options:ALLOW-FROM http://*.house365.com
+Referer-Policy:origin
+Strict-Transport-Security:max-age=31536000
+Cache-Control:no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Content-Security-Policy:frame-ancestors 'self' http://*.house365.com
+Content-Encoding:gzip
+Set-Cookie:PHPSESSID=ec19a7b0d4f9760df12bdfdaa0322bcc; path=/
+Vary:Accept-Encoding
+Expires:Thu, 19 Nov 1981 08:52:00 GMT
+X-XSS-Protection:1; mode=block;
+Content-Type:text/html; charset=gb2312
+做特征词提取：http://nj.house365.com/index.html
+result : /index.html
+做特征词提取：http://hf.house365.com/index.html
+result : /index.html
+做特征词提取：http://wh.house365.com/index.html
+result : /index.html
+做特征词提取：http://wx.house365.com/index.html
+result : /index.html
+做特征词提取：http://sz.house365.com/index.html
+result : /index.html
+10 10 77 a7 1a d2 fb 14 f5 8c 97 6a e2 90 47 b9 17 25 20 12 06 06 02 0e 0e 0c 0c cf cf cd cd cc cc d4 d4 21 34 02 31 26 86 80 8d b3 8d ff 8d 96 8d ff 8d ff 8d dc 8d d6 8d ff 8d e0 8d cd 8d e0 b1 f7 8d fe 8d 91 8d 91 8d 91 8d 91 8d 91 b3 80 8d 85 ab 80 ab 80 ab 80 b1 9b 8d 8b 8d b1 8d b1 8d b1 8d b1 8d b1 8d b1 8d b1 8d b1 80 e0 b1 f9 8d ad 8d d8 8d a3 8d d8 8d a3 8d d8 8d a3 8d d8 8d a3 8d d8 8d a3 80 70 8d b1 8d b1 8d b1 00 04 81 80 80 89 80 63 80 e0 00 13 81 80 81 80 81 80 81 80 81 80 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 84 80 8d d9 8d 8a b1 88 ef 94 b1 88 81 80 81 80 81 80 81 80 81 80 81 80 81 80 b1 88 ef 94 b1 88 81 80 81 80 81 80 81 80 81 80 81 80 81 80 b1 88 ef 94 b1 88 81 80 81 80 81 80 81 80 81 80 81 80 b1 88 ef 94 b1 88 81 80 81 80 81 80 81 80 81 80 81 80 81 80 81 80 81 80 b1 88 ef 94 b1 88 81 80 81 80 81 80 81 80 81 80 ab 80 ab 80 ab 80 8d c4 8d d8 ab 80 ab 80 ab 80 80 a6
+fingerprint size :334
+words size : 20
+ 20a97f0040311300 , 1
+ 20ffffffb76c6f00 , 1
+ 20ffff8b38316b00 , 1
+ 30ffffffffff8200 , 1
+ 30ffffffff9d1300 , 1
+ 30ffffffffff9e00 , 1
+ 50ffffffd9025f00 , 1
+ 50ffffffca7b6e00 , 1
+ 50ffffffffffb400 , 1
+ 60ffffffffff8e00 , 1
+ 60ffffffffff8e00 , 6
+ 60ffffffffff8e00 , 3
+ 60ffffffffff8e00 , 3
+ 60ffffffffff8e00 , 3
+ 60ffffffffff8e00 , 3
+ b0ffffffffffe705 , 1
+ b0ffffffffffe704 , 1
+ b0ffffffffffe703 , 1
+ b0ffffffffffe702 , 1
+ b0ffffffffffe701 , 1
+2021-06-10 09:35:44.365 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.getCandidateSetByWords         : ==>  Preparing: select * from ( select page_id,count(word) `count` from inverted_index where word in ( ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? ) group by page_id ) t where `count` > ?
+2021-06-10 09:35:44.392 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.getCandidateSetByWords         : ==> Parameters: 2353551919331480320(Long), 2377900602033991424(Long), 2377900101683211008(Long), 3530822107858436608(Long), 3530822107851985664(Long), 3530822107858443776(Long), 5836665116418006784(Long), 5836665116174282240(Long), 5836665117072143360(Long), 6989586621678980608(Long), 6989586621678980608(Long), 6989586621678980608(Long), 6989586621678980608(Long), 6989586621678980608(Long), 6989586621678980608(Long), -5692549928996313339(Long), -5692549928996313340(Long), -5692549928996313341(Long), -5692549928996313342(Long), -5692549928996313343(Long), 10(Integer)
+2021-06-10 09:35:47.317 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.getCandidateSetByWords         : <==      Total: 9
+执行匹配...
+IndexResult{pageId=108359, count=25}
+IndexResult{pageId=84, count=18}
+IndexResult{pageId=80344, count=18}
+IndexResult{pageId=80340, count=18}
+IndexResult{pageId=46804, count=17}
+IndexResult{pageId=83265, count=12}
+IndexResult{pageId=117016, count=12}
+IndexResult{pageId=48197, count=11}
+IndexResult{pageId=100987, count=11}
+2021-06-10 09:35:47.321 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==>  Preparing: select * from inverted_index where page_id = ?
+2021-06-10 09:35:47.322 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==> Parameters: 108359(Integer)
+2021-06-10 09:35:49.908 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : <==      Total: 88
+2021-06-10 09:35:49.909 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==>  Preparing: select * from inverted_index where page_id = ?
+2021-06-10 09:35:49.909 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==> Parameters: 84(Integer)
+2021-06-10 09:35:52.357 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : <==      Total: 20
+2021-06-10 09:35:52.357 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==>  Preparing: select * from inverted_index where page_id = ?
+2021-06-10 09:35:52.358 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==> Parameters: 80344(Integer)
+2021-06-10 09:35:54.866 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : <==      Total: 96
+2021-06-10 09:35:54.866 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==>  Preparing: select * from inverted_index where page_id = ?
+2021-06-10 09:35:54.866 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==> Parameters: 80340(Integer)
+2021-06-10 09:35:57.380 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : <==      Total: 96
+2021-06-10 09:35:57.380 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==>  Preparing: select * from inverted_index where page_id = ?
+2021-06-10 09:35:57.380 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==> Parameters: 46804(Integer)
+2021-06-10 09:35:59.846 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : <==      Total: 55
+2021-06-10 09:35:59.847 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==>  Preparing: select * from inverted_index where page_id = ?
+2021-06-10 09:35:59.847 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==> Parameters: 83265(Integer)
+2021-06-10 09:36:02.382 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : <==      Total: 143
+2021-06-10 09:36:02.383 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==>  Preparing: select * from inverted_index where page_id = ?
+2021-06-10 09:36:02.383 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==> Parameters: 117016(Integer)
+2021-06-10 09:36:04.848 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : <==      Total: 53
+2021-06-10 09:36:04.848 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==>  Preparing: select * from inverted_index where page_id = ?
+2021-06-10 09:36:04.849 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==> Parameters: 48197(Integer)
+2021-06-10 09:36:07.345 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : <==      Total: 158
+2021-06-10 09:36:07.345 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==>  Preparing: select * from inverted_index where page_id = ?
+2021-06-10 09:36:07.346 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : ==> Parameters: 100987(Integer)
+2021-06-10 09:36:09.767 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFeatureWordsByPageID     : <==      Total: 108
+IndexResult{pageId=84, count=18}
+candidate page size : 1
+2021-06-10 09:36:09.768 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFingerprintsByPageIds    : ==>  Preparing: select page_id,fpdata from fingerprint where page_id in ( ? )
+2021-06-10 09:36:09.768 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFingerprintsByPageIds    : ==> Parameters: 84(Integer)
+2021-06-10 09:36:09.775 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.M.selectFingerprintsByPageIds    : <==      Total: 1
+Target: host-> www.house365.com, path->
+
+匹配详情
+2021-06-10 09:36:09.782 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.MatchMapper.selectUrlByPageID    : ==>  Preparing: select url from page_url where page_id = ?
+2021-06-10 09:36:09.783 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.MatchMapper.selectUrlByPageID    : ==> Parameters: 84(Integer)
+2021-06-10 09:36:09.785 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.MatchMapper.selectUrlByPageID    : <==      Total: 1
+URL = http://www.house365.com
+[84,  0.9238295318127251]
+fpdata : 10 11 77 a7 1a d2 fb 14 f5 8c 97 6a e2 90 47 b9 17 25 df 20 12 06 06 02 0e 0e 0c 0c cf cf cd cd cc cc d4 d4 21 34 02 31 26 86 80 8d b3 8d ff 8d 96 8d ff 8d ff 8d dc 8d d6 8d ff 8d e0 8d cd 8d e0 b1 f7 8d fe 8d 91 8d 91 8d 91 8d 91 8d 91 b3 80 8d 85 ab 80 ab 80 ab 80 b1 9b 8d 8b 8d b1 8d b1 8d b1 8d b1 8d b1 8d b1 8d b1 8d b1 80 e0 b1 f9 8d ad 8d d8 8d a3 8d d8 8d a3 8d d8 8d a3 8d d8 8d a3 8d d8 8d a3 80 70 8d b1 8d b1 8d b1 00 04 81 80 80 89 80 63 80 e0 00 13 81 80 81 80 81 80 81 80 81 80 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 81 80 8d b9 8d 9b 84 80 8d d9 8d 8a b1 88 ef 94 b1 88 81 80 81 80 81 80 81 80 81 80 81 80 81 80 b1 88 ef 94 b1 88 81 80 81 80 81 80 81 80 81 80 81 80 81 80 b1 88 ef 94 b1 88 81 80 81 80 81 80 81 80 81 80 81 80 b1 88 ef 94 b1 88 81 80 81 80 81 80 81 80 81 80 81 80 81 80 81 80 81 80 b1 88 ef 94 b1 88 81 80 81 80 81 80 81 80 81 80 ab 80 ab 80 ab 80 8d c4 8d d8 ab 80 ab 80 ab 80 80 a6
+match result : true
+Page id : 84
+2021-06-10 09:36:09.870 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.MatchMapper.selectUrlByPageID    : ==>  Preparing: select url from page_url where page_id = ?
+2021-06-10 09:36:09.870 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.MatchMapper.selectUrlByPageID    : ==> Parameters: 84(Integer)
+2021-06-10 09:36:09.872 DEBUG 2028 --- [nio-8080-exec-1] o.e.s.m.MatchMapper.selectUrlByPageID    : <==      Total: 1
+query result : http://www.house365.com

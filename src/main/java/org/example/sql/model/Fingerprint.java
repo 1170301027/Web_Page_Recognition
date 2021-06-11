@@ -46,6 +46,13 @@ public class Fingerprint implements Comparable<Fingerprint> {
 
     @Override
     public String toString() {
-        return "["+ pageId + ",  " + similarity + "]\n" + "fpdata : " + Arrays.toString(fpdata);
+        StringBuilder fp = new StringBuilder();
+        for (byte fpdatum : fpdata) {
+            String hex = Integer.toHexString(0xFF & fpdatum);
+            if (hex.length() < 2) fp.append("0");
+            fp.append(hex);
+            fp.append(" ");
+        }
+        return "["+ pageId + ",  " + similarity + "]\n" + "fpdata : " + fp;
     }
 }

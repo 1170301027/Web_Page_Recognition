@@ -21,4 +21,12 @@ public class IndexResult implements Comparable<IndexResult> {
     public int compareTo(IndexResult o){
         return Integer.compare(o.count, count);
     }
+
+    @Override
+    public String toString() {
+        return "IndexResult{" +
+                "pageId=" + pageId +
+                ", count=" + count +
+                '}';
+    }
 }

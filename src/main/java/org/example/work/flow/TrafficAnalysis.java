@@ -1,6 +1,5 @@
 package org.example.work.flow;
 
-import org.example.kit.ByteBuffer;
 import org.example.kit.entity.ByteArray;
 import org.example.work.match.MatchTask;
 
@@ -67,8 +66,8 @@ public class TrafficAnalysis {
             return ;
         }
         // 解析数据报
-        ssl_handshake handshake = new ssl_handshake(type,help.getShort(buffer.subBytes(index,index + 2)),
-                help.getShort(buffer.subBytes(index + 2, index + 4)),buffer.subBytes(index + 4));
+        ssl_handshake handshake = new ssl_handshake(type, Util.getShort(buffer.subBytes(index,index + 2)),
+                Util.getShort(buffer.subBytes(index + 2, index + 4)),buffer.subBytes(index + 4));
         boolean flag = false;
         String host = "";
         if (handshake.isIs_client_hello()) {
@@ -113,7 +112,7 @@ class mac_header {
         ByteArray buffer = new ByteArray(content);
         this.dst_mac = buffer.subBytes(0,6);
         this.src_mac = buffer.subBytes(6,12);
-        this.eth_type = help.getShort(buffer.subBytes(12,14));
+        this.eth_type = Util.getShort(buffer.subBytes(12,14));
     }
 
     public byte[] getDst_mac() {
@@ -148,6 +147,7 @@ class ip_header {
     private short fragment_offset;
     private byte ttl;
     private byte protocol;
+    private byte[] checksum;
     private byte[] source_ip;// 4
     private byte[] target_ip;// 4
 
@@ -158,14 +158,16 @@ class ip_header {
         this.version = (temp >> 4) & 0xF;
         this.header_length = temp & 0xF;
         this.tos = buffer.get(index++);
-        this.total_length = help.getShort(buffer.subBytes(index,index + 2));
+        this.total_length = Util.getShort(buffer.subBytes(index,index + 2));
         index += 2;
-        this.id = help.getShort(buffer.subBytes(index,index + 2));
+        this.id = Util.getShort(buffer.subBytes(index,index + 2));
         index += 2;
-        this.fragment_offset = help.getShort(buffer.subBytes(index,index + 2));
+        this.fragment_offset = Util.getShort(buffer.subBytes(index,index + 2));
         index += 2;
         this.ttl = buffer.get(index++);
         this.protocol = buffer.get(index++);
+        this.checksum = buffer.subBytes(index, index + 2);
+        index += 2;
         this.source_ip = buffer.subBytes(index,index + 4);
         index += 4;
         this.target_ip = buffer.subBytes(index,index + 4);
@@ -213,6 +215,14 @@ class ip_header {
 
     @Override
     public String toString() {
+        StringBuilder sip = new StringBuilder();
+        StringBuilder tip = new StringBuilder();
+        for (int i = 0,j = 0; i < this.source_ip.length && j < this.target_ip.length; i++,j++) {
+            sip.append(Integer.toHexString(source_ip[i] & 0xFF));
+            sip.append(" ");
+            tip.append(Integer.toHexString(target_ip[j] & 0xFF));
+            tip.append(" ");
+        }
         return "ip_header{" +
                 "version=" + version +
                 ", header_length=" + header_length +
@@ -222,8 +232,8 @@ class ip_header {
                 ", fragment_offset=" + fragment_offset +
                 ", ttl=" + ttl +
                 ", protocol=" + protocol +
-                ", source_ip=" + Arrays.toString(source_ip) +
-                ", target_ip=" + Arrays.toString(target_ip) +
+                ", source_ip=" + sip +
+                ", target_ip=" + tip +
                 '}';
     }
 }
@@ -243,23 +253,23 @@ class tcp_header {
     public tcp_header(byte[] content) {
         ByteArray buffer = new ByteArray(content);
         int index = 0;
-        this.src_port = help.getShort(buffer.subBytes(index,index + 2));
+        this.dst_port = Util.getShort(buffer.subBytes(index,index + 2));
         index += 2;
-        this.dst_port = help.getShort(buffer.subBytes(index,index + 2));
+        this.src_port = Util.getShort(buffer.subBytes(index,index + 2));
         index += 2;
-        this.sequence = help.getInteger(buffer.subBytes(index, index + 4));
+        this.sequence = Util.getInteger(buffer.subBytes(index, index + 4));
         index += 4;
-        this.acknowledge_number = help.getInteger(buffer.subBytes(index,index + 4));
+        this.acknowledge_number = Util.getInteger(buffer.subBytes(index,index + 4));
         index += 4;
         this.header_length = (buffer.get(index) >> 4) & 0xF;
         this.flags = buffer.subBytes(index, index + 2);
         this.flags[0] &= 0x0F;
         index += 2;
-        this.window_size = help.getShort(buffer.subBytes(index,index + 2));
+        this.window_size = Util.getShort(buffer.subBytes(index,index + 2));
         index += 2;
-        this.checksum = help.getShort(buffer.subBytes(index,index + 2));
+        this.checksum = Util.getShort(buffer.subBytes(index,index + 2));
         index += 2;
-        this.urgent_pointer = help.getShort(buffer.subBytes(index,index + 2));
+        this.urgent_pointer = Util.getShort(buffer.subBytes(index,index + 2));
     }
 
     public short getSrc_port() {
@@ -615,15 +625,20 @@ class ssl_extension {
     }
 }
 
-class help {
+class Util {
     public static short getShort(byte[] bytes) {
         if (bytes == null || bytes.length!=2) {
             System.out.println("数据格式错误，"+ Arrays.toString(bytes));
             return 0;
         }
-        byte argB1 = bytes[0];
-        byte argB2 = bytes[1];
-        return (short) ((argB1 << 8)| (argB2 & 0xFF));
+//        byte argB1 = bytes[0];
+//        byte argB2 = bytes[1];
+//        int result = (((argB1) << 8)| (argB2 & 0xFF));
+//        System.out.println(result);
+        return (short) (bytes[1] & 0xFF |
+                        (bytes[0] & 0xFF) << 8 |
+                        (0) << 16 |
+                        (0) << 24);
     }
 
     public static int getInteger(byte[] bytes) {

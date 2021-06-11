@@ -2,6 +2,7 @@ package org.example.kit;
 
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
+import org.example.kit.entity.ByteArray;
 import org.example.uitl.FilePath;
 
 import java.io.*;
@@ -214,5 +215,31 @@ public class FileKit {
             pw.println(s);
         }
         pw.close();
+    }
+
+    public static void savePacket(String url, ByteArray html_source) {
+        File file = new File(FilePath.ALL_PACKAGES);
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("url", url);
+            map.put("data", html_source.toStr());
+            JSONObject jsonData = JSONObject.fromObject(map);
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true)));
+            synchronized (file) {
+                bw.write(jsonData.toString());
+                bw.write("\n");
+                bw.write(TAG_SEPARATOR);
+                bw.write("\n");
+            }
+            bw.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("写入文件失败");
+        } catch (IOException e) {
+            System.out.println("创建文件失败");
+        }
+
     }
 }

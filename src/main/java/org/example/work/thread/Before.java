@@ -1,5 +1,6 @@
 package org.example.work.thread;
 
+import org.example.kit.FileKit;
 import org.example.kit.entity.ByteArray;
 import org.example.kit.io.ByteBuilder;
 import org.example.sql.conn.ConnectToMySql;
@@ -135,6 +136,7 @@ public class Before {
                 ByteArrayInputStream in = new ByteArrayInputStream(html_source.getParentBytes(), html_source.from(), html_source.length());
                 try{
                     html_source = decompress(new GZIPInputStream(in, 128));
+                    FileKit.savePacket(url,html_source);
                 }catch(IOException e){
 //                    System.out.println(Arrays.toString(html_source.getBytes()));
 //                    throw new WorkerException("HTML 解压缩过程失败 " + e.getMessage(), e);

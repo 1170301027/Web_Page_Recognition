@@ -30,9 +30,9 @@ public class MatcherTest {
         MatchResult matchResult = matcher.match(matchTask);
         System.out.println("match result : " + matchResult.isSuccess());
         if (matchResult.isSuccess()) {
-            System.out.println("Page id : " + matchResult.getWebPageId());
+            System.out.println("Page id : " + matchResult.getPage_id());
             ConnectToMySql conn = new ConnectToMySql();
-            String url = conn.getMatchMapper().selectUrlByPageID(matchResult.getWebPageId());
+            String url = conn.getMatchMapper().selectUrlByPageID(matchResult.getPage_id());
             System.out.println("query result : " + url);
         }
     }
@@ -48,9 +48,16 @@ public class MatcherTest {
     }
 
     @Test
+    public void testTransShort() {
+        byte[] asd = new byte[]{(byte) 0xF3, (byte) 0xAC};
+//        System.out.println(TrafficAnalysis.getShort(asd));
+//        System.out.println((char) test);
+    }
+
+    @Test
     public void testParseClientHello() {
         try {
-            byte[] packet = FileKit.getAllBytes(new File(FilePath.ROOT_PATH + "test\\data.pcap"));
+            byte[] packet = FileKit.getAllBytes(new File(FilePath.ROOT_PATH + "source\\clienthello.pcap"));
 //            System.out.println(new String(packet));
             for (int i = 0; i < packet.length; i++) {
                 if (i % 16 == 0) System.out.println();
@@ -59,10 +66,11 @@ public class MatcherTest {
             System.out.println();
             MatchTask matchTask = new MatchTask();
             TrafficAnalysis.clientHelloAnalysis(packet,matchTask);
-            System.out.println(matchTask.toString());
+            System.out.println(matchTask);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
     }
+
 }

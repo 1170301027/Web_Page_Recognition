@@ -258,8 +258,8 @@ public class ExtractFingerprint {
         Queue<Node> queue = new LinkedList<>(); // 队列用于层序遍历
         Node[] leaf_nodes = new Node[0]; // 存放解析最大深度时候的所有节点（相当于叶子节点），用于特征词提取
         queue.offer(html_body);
-        // next_level存放下层节点数，to_be_print存放当前层待访问节点数，node_count记录总访问节点数，用于判断阈值（此间为200）
-        int next_level = 0,to_be_printed = 1, node_count = to_be_printed;
+        // next_level存放下层节点数，to_be_access存放当前层待访问节点数，node_count记录总访问节点数，用于判断阈值（此间为200）
+        int next_level = 0,to_be_access = 1, node_count = to_be_access;
         while (!queue.isEmpty()) {
             Node temp = queue.poll();
             if (temp instanceof Element) { // 对元素节点进行操作
@@ -304,9 +304,9 @@ public class ExtractFingerprint {
                 result[i++] = hashTo1Byte(text.getText().toStr());
                 temp.setHashCode(result[i] << 8);
             }
-            to_be_printed--; // 更新待访问节点数目
-            if (to_be_printed == 0) {
-                to_be_printed = next_level;
+            to_be_access--; // 更新待访问节点数目
+            if (to_be_access == 0) {
+                to_be_access = next_level;
                 next_level = 0;
                 if (i-oldi >= 12) { // 指纹序列长度大于某阈值，进行指纹提取。
                     // TODO 提取一个特征词

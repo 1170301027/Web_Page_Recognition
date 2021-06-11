@@ -80,7 +80,7 @@ public class ThreadPool {
 
 
     public void run_crawl_url_list() {
-        List<String> urls = doParse(FilePath.ALL_WEBSITE);
+        List<String> urls = doParse(FilePath.URL_LIST);
         System.out.println("完成读取url数据 :" + urls.size());
         int count = 0;
         serial_number = 0;//

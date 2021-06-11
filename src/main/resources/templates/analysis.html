@@ -5,12 +5,13 @@
     <title>Webpage Recognition</title>
 </head>
 <body>
-
+<H1>Welcome to webpage recognition system!</H1>
 <div th:if="${ message }">
     <h2 th:text="'  Result : '+${ message }"></h2>
     <h2 th:text="'  SNI : ' + ${ SNI }"></h2>
     <h2 th:text="'  Real Domain : ' + ${ host }"></h2>
     <h2 th:text="'  Is Valid : '+${ valid }"></h2>
+    <h2 th:text="'  Host Id : '+${ host_id }"></h2>
 </div>
 </body>
 </html>

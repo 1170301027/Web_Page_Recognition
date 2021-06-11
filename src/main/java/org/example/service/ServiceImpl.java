@@ -29,7 +29,6 @@ public class ServiceImpl {
         List<InvertedIndex> words = this.matchMapper.selectFeatureWordsByPageID(page_id);
         RestResult rest = new RestResult();
         rest.setFingerprint(fp);
-        rest.setContent(fp.getFpdata());
         rest.setUrl(this.matchMapper.selectUrlByPageID(page_id));
         rest.setWords(words);
         return rest;
@@ -50,5 +49,4 @@ public class ServiceImpl {
             }
         }
     }
-
 }

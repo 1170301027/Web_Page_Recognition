@@ -66,9 +66,9 @@ public class NewMatcher extends Matcher{
         }
         System.out.println("match result : " + matchResult.isSuccess());
         if (matchResult.isSuccess()) {
-            System.out.println("Page id : " + matchResult.getWebPageId());
+            System.out.println("Page id : " + matchResult.getPage_id());
             ConnectToMySql conn = new ConnectToMySql();
-            String url = conn.getMatchMapper().selectUrlByPageID(matchResult.getWebPageId());
+            String url = conn.getMatchMapper().selectUrlByPageID(matchResult.getPage_id());
             System.out.println("query result : " + url);
         }
     }

@@ -4,11 +4,10 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.aspectj.lang.annotation.After;
 import org.example.sql.mapper.MatchMapper;
-import org.example.sql.model.Fingerprint;
-import org.example.sql.model.InvertedIndex;
-import org.example.sql.model.IptoHost;
-import org.example.sql.model.PagetoUrl;
+import org.example.sql.model.*;
+import org.example.work.match.MatchResult;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,6 +97,18 @@ public class ConnectToMySql {
             return ;
         }
         matchMapper.insertPagetoUrl(pagetoUrls);
+        commit();
+    }
+
+    public void insertWebsite(Website website) {
+        if (website == null) return;
+        matchMapper.insertOneWebsite(website);
+        commit();
+    }
+
+    public void insertMatchResult(MatchResult matchResult) {
+        if (matchResult == null) return;
+        matchMapper.insertMatchResult(matchResult);
         commit();
     }
 

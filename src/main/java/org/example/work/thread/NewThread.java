@@ -24,6 +24,6 @@ public class NewThread extends ThreadToCrawlPages {
         crawl_new(url, serial);
         long end = System.currentTimeMillis();
         System.out.println("serial = " + serial + ", timespan = " + (end - start) + ", url = " + url);
-        FileKit.writeALineToFile(String.valueOf(end - start),"../log/crawl_time_span.txt");
+//        FileKit.writeALineToFile(String.valueOf(end - start),"../log/crawl_time_span.txt");
     }
 }
